@@ -1,0 +1,1 @@
+start /B pythonw.exe "C:\Users\troypouliot\Google Drive\Programming Training\Python\Work Automation\CheckMarkingStamp\check_marking_stamp.py" %
