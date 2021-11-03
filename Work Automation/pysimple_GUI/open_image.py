@@ -4,6 +4,10 @@ from pysimple_GUI.lith import lith_oop
 
 
 
+
+
+
+
 file_types = (('JPG IMAGE', '*.jpg'), ('PNG IMAGE', '*.png'))
 lith_type_frame_layout = [[sg.Radio('NightLight', "lith_type", default=True, size=(10,1), k='-R1-'), sg.Radio('Window Cling', "lith_type", default=False, size=(10,1), k='-R2-')]]
 size_frame_layout = [[sg.pin(sg.Radio('Small', "size", default=True, key='-small-')), sg.pin(sg.Radio('Medium', "size", default=False, key='-medium-')), sg.pin(sg.Radio('Large', "size", default=False, key='-large-'))],
