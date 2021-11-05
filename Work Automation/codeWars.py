@@ -127,5 +127,31 @@ def disemvowel(string_):
     return string
 
 
-
 print(disemvowel('This website is for losers LOL!'))
+
+
+'''Task
+You need to return a string that looks like a diamond shape when printed on the screen, using asterisk (*) characters. 
+Trailing spaces should be removed, and every line must be terminated with a newline character (\n).
+Return null/nil/None/... if the input is an even number or negative, 
+as it is not possible to print a diamond of even or negative size.'''
+
+def diamond(n):
+    # Make some diamonds!
+    if n % 2 == 0 or n < 0:
+        return None
+    else:
+        string = ' ' * int((n-1)/2) + '*\n'
+        if n > 1:
+            spaces1 = int((n-1)/2)-1
+            spaces2 = 1
+            for i in range(3, n+2, 2):
+                string += ' ' * int(spaces1) + '*' * i + '\n'
+                spaces1 -= 1
+            for i in range(n-2, 0, -2):
+                string += ' ' * int(spaces2) + '*' * i + '\n'
+                spaces2 += 1
+    return string
+
+
+print(diamond(111))
