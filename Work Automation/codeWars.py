@@ -155,3 +155,29 @@ def diamond(n):
 
 
 print(diamond(111))
+
+
+'''
+Reverse every other word in a given string, then return the string. 
+Throw away any leading or trailing whitespace, while ensuring there is exactly one space between each word. 
+Punctuation marks should be treated as if they are a part of the word in this kata.
+'''
+
+def reverse_alternate(string):
+    string_lst = [wrd for wrd in list(string.strip().split(' ')) if wrd != ""]
+    answer = ''
+    for index, word in enumerate(string_lst):
+        if word == '':
+            continue
+        if index+1 == len(string_lst) and index % 2 == 0:
+            answer += word
+        elif index % 2 == 0:
+            answer += word + ' '
+        elif index+1 == len(string_lst):
+            answer += word[::-1]
+        else:
+            answer += word[::-1] + ' '
+    return answer
+
+
+print(reverse_alternate('This    is a test '))
