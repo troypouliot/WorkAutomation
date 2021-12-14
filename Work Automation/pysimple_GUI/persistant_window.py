@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+from PySimpleGUI import theme_previewer
 
 sg.theme('BluePurple')
 
@@ -18,5 +19,7 @@ while True:  # Event Loop
     if event == 'Show':
         # Update the "output" text element to be the value of "input" element
         window['-OUTPUT-'].update(values['-IN-'])
+    if event == 'Another Button':
+        theme_previewer()
 
 window.close()
