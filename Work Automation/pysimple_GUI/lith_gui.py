@@ -228,11 +228,27 @@ def main_window():
                             x8BHgE+AoAo6M5MpnjEHkZ1ahFmVpxN3EO7k5E7vHJh+3Hpk4SEXSFVJ+hoRJQAr7T5CfdA7yO6g
                             lHm6jm1a7+q/onVDdhWdOfN8WaEW8S/w/ViE0ecu00qQAAAABJRU5ErkJggg==''')
 
+def get_config_param(param):
+    config = ConfigParser()
+    config.read('config.ini')
+    return config.get('DEFAULT', param)
 
 def settings_window():
-    layout = [[sg.Frame('Default Settings',[[sg.Text('Resolution:'), sg.Input()],
-                                            [sg.Text('Minimum Thickness:'), sg.Input()]])],
-              [sg.Button('Erase'), sg.Button('Popup'), sg.Button('Exit')]]
+    default_frame = sg.Frame('Default Settings', [[sg.Text(), sg.Column([[sg.Text('Resolution:')],
+                                                                         [sg.Input(k='-res-', size=(3,1), default_text=get_config_param('res'))],
+                                                  [sg.Text('Minimum Thickness:')],
+                                                  [sg.Input(k='-min-', size=(3,1), default_text=get_config_param('min_thick'))],
+                                                  [sg.Text('Maximum Thickness:')],
+                                                  [sg.Input(k='-max-', size=(3,1), default_text=get_config_param('max_thick'))],
+                                                  [sg.Text('User:')],
+                                                  [sg.Input(k='-user-', default_text=get_config_param('user'))],
+                                                  [sg.Text('Nightlight URL:')],
+                                                  [sg.Input(k='-nl_url-', default_text=get_config_param('nl_url'))],
+                                                  [sg.Text('Window URL:')],
+                                                  [sg.Input(k='-wind_url-', default_text=get_config_param('window_url'))]
+                                                  ])]])
+    layout = [[default_frame],
+              [sg.Button('Save'), sg.Button('Cancel')]]
     return sg.Window('Settings', layout, finalize=True, modal=True)
 
 
@@ -331,7 +347,7 @@ while True:
             event, values = window.read(timeout=100)
             if event != sg.TIMEOUT_KEY:
                 print(event, values)
-            if event == sg.WIN_CLOSED or event == 'Exit':
+            if event == sg.WIN_CLOSED or event == 'Cancel':
                 window.close()
                 break
         # break
