@@ -103,15 +103,16 @@ sg.theme('DarkGrey5')
 file_types = (('JPG IMAGE', '*.jpg'), ('PNG IMAGE', '*.png'))
 
 def main_window():
-    lith_type_frame_layout = [[sg.Radio('NightLight', "lith_type", default=True, size=(10, 1), k='-nightlight-'),
-                               sg.Radio('Window Cling', "lith_type", default=False, size=(10, 1), k='-wind_cling')]]
+    lith_type_frame_layout = [[sg.Radio('NightLight', "lith_type", default=True, size=(10, 1), k='-nightlight-', enable_events=True),
+                               sg.Radio('Window Cling', "lith_type", default=False, size=(10, 1), k='-wind_cling-', enable_events=True)]]
 
-    sub_type_frame_layout = [[sg.pin(sg.Radio('Small', "size", default=True, key='-small-')),
-                              sg.pin(sg.Radio('Medium', "size", default=False, key='-medium-')),
-                              sg.pin(sg.Radio('Large', "size", default=False, key='-large-'))],
-                             [sg.pin(sg.Radio('Square', "ori", default=True, key='-square-')),
-                              sg.pin(sg.Radio('Portrait', "ori", default=False, key='-portrait-')),
-                              sg.pin(sg.Radio('Landscape', "ori", default=False, key='-landscape-'))]]
+    sub_type_frame_layout = [[sg.pin(sg.Radio('Square', "ori", default=True, key='-square-', enable_events=True)),
+                              sg.pin(sg.Radio('Portrait', "ori", default=False, key='-portrait-', enable_events=True)),
+                              sg.pin(sg.Radio('Landscape', "ori", default=False, key='-landscape-', enable_events=True))],
+                             [sg.pin(sg.Radio('Small', "size", default=True, key='-small-', enable_events=True)),
+                              sg.pin(sg.Radio('Medium', "size", default=False, key='-medium-', enable_events=True)),
+                              sg.pin(sg.Radio('Large', "size", default=False, key='-large-', enable_events=True))],
+                             ]
 
     image_preview_frame_layout = [[sg.Image(key="-IMAGE-")]]
 
@@ -229,46 +230,56 @@ def main_window():
 
 
 def settings_window():
-    layout = [[sg.Text('The second window')],
-              [sg.Input(key='-IN-', enable_events=True)],
-              [sg.Text(size=(25,1), k='-OUTPUT-')],
+    layout = [[sg.Frame('Default Settings',[[sg.Text('Resolution:'), sg.Input()],
+                                            [sg.Text('Minimum Thickness:'), sg.Input()]])],
               [sg.Button('Erase'), sg.Button('Popup'), sg.Button('Exit')]]
     return sg.Window('Settings', layout, finalize=True, modal=True)
 
 
-window, settings = main_window(), None
-
+window_main, window_settings = main_window(), None
+window = None
+base_type = None
+sub_type = None
 while True:
-    window, event, values = sg.read_all_windows()
-    # event, values = window.read(timeout=100)
-    print(values, event)
+
+    event, values = window_main.read(timeout=100)
 
 
 
-    if window['-nightlight-'] and window['-square-']:
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        window_main.close()
+        break
+
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        window_main.close()
+    if window == window_main:       # if closing win 2, mark as closed
+        window_main = None
+    elif window == window_settings:     # if closing win 1, mark as closed
+        window_settings = None
+
+    if values['-nightlight-'] and values['-square-']:
         base_type = 'nl'
         sub_type = 'square'
-    elif window['-nightlight-'] and window['-portrait-']:
+    elif values['-nightlight-'] and values['-portrait-']:
         base_type = 'nl'
         sub_type = 'portrait'
-    elif window['-nightlight-'] and window['-landscape-']:
+    elif values['-nightlight-'] and values['-landscape-']:
         base_type = 'nl'
         sub_type = 'landscape'
-    elif window['-wind_cling'] and window['-small-']:
+    elif values['-wind_cling-'] and values['-small-']:
         base_type = 'wind'
         sub_type = 'sm'
-    elif window['-wind_cling'] and window['-medium-']:
+    elif values['-wind_cling-'] and values['-medium-']:
         base_type = 'wind'
         sub_type = 'med'
-    elif window['-wind_cling'] and window['-large-']:
+    elif values['-wind_cling-'] and values['-large-']:
         base_type = 'wind'
         sub_type = 'lrg'
 
-    if event in (sg.WIN_CLOSED, 'Exit'):
-        break
 
-    if window['-load_img_btn-'] != '':
-        filename_elem = window['-filename-']
+
+    if values['-load_img_btn-'] != '':
+        filename_elem = window_main['-filename-']
         fp = os.path.normpath(values['-load_img_btn-'])
         fn = os.path.basename(fp)
         filename_elem.update(fn)
@@ -277,29 +288,29 @@ while True:
             image.thumbnail((300, 300))
             bio = io.BytesIO()
             image.save(bio, format="PNG")
-            window["-IMAGE-"].update(data=bio.getvalue())
+            window_main["-IMAGE-"].update(data=bio.getvalue())
     if values['-dl_path_btn-'] != '':
-        dl_path_elem = window['-dl_path-']
+        dl_path_elem = window_main['-dl_path-']
         dl_path = os.path.normpath(values['-dl_path_btn-'])
         dl_path_elem.update(dl_path)
-    if values['-wind_cling']:
-        window['-small-'].update(visible=True)
-        window['-medium-'].update(visible=True)
-        window['-large-'].update(visible=True)
-        window['-square-'].update(visible=False)
-        window['-portrait-'].update(visible=False)
-        window['-landscape-'].update(visible=False)
+    if event == '-wind_cling-':
+        window_main['-small-'].update(visible=True)
+        window_main['-medium-'].update(visible=True)
+        window_main['-large-'].update(visible=True)
+        window_main['-square-'].update(visible=False)
+        window_main['-portrait-'].update(visible=False)
+        window_main['-landscape-'].update(visible=False)
 
-    if values['-nightlight-']:
-        window['-small-'].update(visible=False)
-        window['-medium-'].update(visible=False)
-        window['-large-'].update(visible=False)
-        window['-square-'].update(visible=True)
-        window['-portrait-'].update(visible=True)
-        window['-landscape-'].update(visible=True)
+    if event == '-nightlight-':
+        window_main['-small-'].update(visible=False)
+        window_main['-medium-'].update(visible=False)
+        window_main['-large-'].update(visible=False)
+        window_main['-square-'].update(visible=True)
+        window_main['-portrait-'].update(visible=True)
+        window_main['-landscape-'].update(visible=True)
 
     if event == 'Create File':
-        if values['-dl_path_btn-'] and values['-load_img_btn-'] != '':
+        if window_main['-dl_path_btn-'] and window_main['-load_img_btn-'] != '':
             my_lith = Lithophane(base_type, f'{base_type}_{sub_type}')
             if base_type == 'nl':
                 my_lith.dl_nl(fp, dl_path)
@@ -307,8 +318,22 @@ while True:
                 my_lith.dl_wind(fp, dl_path)
         else:
             sg.PopupOK(' Make sure all fields are filled in                ', title='Empty Fields')
+
+    if event != sg.TIMEOUT_KEY:
+        print(event, values)
+        print(base_type, sub_type)
+
+
     if event == '-settings_btn-':
-        settings_window()
+        window = settings_window()
+
+        while True:
+            event, values = window.read(timeout=100)
+            if event != sg.TIMEOUT_KEY:
+                print(event, values)
+            if event == sg.WIN_CLOSED or event == 'Exit':
+                window.close()
+                break
         # break
 
-window.close()
+window_main.close()
