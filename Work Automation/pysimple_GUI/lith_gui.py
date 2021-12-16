@@ -99,16 +99,20 @@ class Lithophane:
         self.driver.find_element_by_id('rect_scale').send_keys('1.0')
         download_btn.click()
 
+
 sg.theme('DarkGrey5')
 file_types = (('JPG IMAGE', '*.jpg'), ('PNG IMAGE', '*.png'))
 
+
 def main_window():
-    lith_type_frame_layout = [[sg.Radio('NightLight', "lith_type", default=True, size=(10, 1), k='-nightlight-', enable_events=True),
-                               sg.Radio('Window Cling', "lith_type", default=False, size=(10, 1), k='-wind_cling-', enable_events=True)]]
+    lith_type_frame_layout = [
+        [sg.Radio('NightLight', "lith_type", default=True, size=(10, 1), k='-nightlight-', enable_events=True),
+         sg.Radio('Window Cling', "lith_type", default=False, size=(10, 1), k='-wind_cling-', enable_events=True)]]
 
     sub_type_frame_layout = [[sg.pin(sg.Radio('Square', "ori", default=True, key='-square-', enable_events=True)),
                               sg.pin(sg.Radio('Portrait', "ori", default=False, key='-portrait-', enable_events=True)),
-                              sg.pin(sg.Radio('Landscape', "ori", default=False, key='-landscape-', enable_events=True))],
+                              sg.pin(
+                                  sg.Radio('Landscape', "ori", default=False, key='-landscape-', enable_events=True))],
                              [sg.pin(sg.Radio('Small', "size", default=True, key='-small-', enable_events=True)),
                               sg.pin(sg.Radio('Medium', "size", default=False, key='-medium-', enable_events=True)),
                               sg.pin(sg.Radio('Large', "size", default=False, key='-large-', enable_events=True))],
@@ -129,7 +133,7 @@ def main_window():
               [sg.Button('Create File'), sg.Button('Exit'), sg.Button('Change Settings', key='-settings_btn-')]]
 
     return sg.Window('Lithophane Setup', layout, finalize=True,
-                       icon=b'''iVBORw0KGgoAAAANSUhEUgAAAJIAAACrCAYAAACNDsXrAAAACXBIWX
+                     icon=b'''iVBORw0KGgoAAAANSUhEUgAAAJIAAACrCAYAAACNDsXrAAAACXBIWX
                             MAABbuAAAW7gEac8QCAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAFUJJRE
                             FUeJztnXucHFWVx7+numcmr1EEBAlkzUC6q2dGCUpAIOsqa7IqxsciT1+gKywigvh+sR/0o+7KQ0
                             EeyiqrLrIrrssHXVx5rAQVRCSCBGamq3qSoMEEDESTyOQx3XX2j54hIenqrsftR6r6+/nMJ9NV95
@@ -228,39 +232,186 @@ def main_window():
                             x8BHgE+AoAo6M5MpnjEHkZ1ahFmVpxN3EO7k5E7vHJh+3Hpk4SEXSFVJ+hoRJQAr7T5CfdA7yO6g
                             lHm6jm1a7+q/onVDdhWdOfN8WaEW8S/w/ViE0ecu00qQAAAABJRU5ErkJggg==''')
 
-def get_config_param(param):
+
+def get_config_param(option, section='DEFAULT'):
     config = ConfigParser()
     config.read('config.ini')
-    return config.get('DEFAULT', param)
+    return config.get(section, option)
+
 
 def settings_window():
-    default_frame = sg.Frame('Default Settings', [[sg.Text(), sg.Column([[sg.Text('Resolution:')],
-                                                                         [sg.Input(k='-res-', size=(3,1), default_text=get_config_param('res'))],
-                                                  [sg.Text('Minimum Thickness:')],
-                                                  [sg.Input(k='-min-', size=(3,1), default_text=get_config_param('min_thick'))],
-                                                  [sg.Text('Maximum Thickness:')],
-                                                  [sg.Input(k='-max-', size=(3,1), default_text=get_config_param('max_thick'))],
-                                                  [sg.Text('User:')],
-                                                  [sg.Input(k='-user-', default_text=get_config_param('user'))],
-                                                  [sg.Text('Nightlight URL:')],
-                                                  [sg.Input(k='-nl_url-', default_text=get_config_param('nl_url'))],
-                                                  [sg.Text('Window URL:')],
-                                                  [sg.Input(k='-wind_url-', default_text=get_config_param('window_url'))]
-                                                  ])]])
+    default_frame = sg.Frame('Default Settings', [[sg.Column([[sg.Text('Resolution:')],
+                                                              [sg.Input(k='-res-', size=(3, 1),
+                                                                        default_text=get_config_param('res'))],
+                                                              [sg.Text('Minimum Thickness:')],
+                                                              [sg.Input(k='-min-', size=(3, 1),
+                                                                        default_text=get_config_param('min_thick'))],
+                                                              [sg.Text('Maximum Thickness:')],
+                                                              [sg.Input(k='-max-', size=(3, 1),
+                                                                        default_text=get_config_param('max_thick'))],
+                                                              [sg.Text('User:')],
+                                                              [sg.Input(k='-user-',
+                                                                        default_text=get_config_param('user'))],
+                                                              [sg.Text('Nightlight URL:')],
+                                                              [sg.Input(k='-nl_url-',
+                                                                        default_text=get_config_param('nl_url'))],
+                                                              [sg.Text('Window URL:')],
+                                                              [sg.Input(k='-wind_url-',
+                                                                        default_text=get_config_param('window_url'))]
+                                                              ], pad=5)]], pad=5)
+    nl_frame = sg.Frame('NightLight Settings', [[sg.Column([[sg.Frame('Square', [[sg.Text('Radius:')],
+                                                 [sg.Input(k='-nl_sq_rad-', size=(3, 1),
+                                                           default_text=get_config_param(
+                                                               'radius',
+                                                               'nl_square'))],
+                                                 [sg.Text('Width:')],
+                                                 [sg.Input(k='-nl_sq_wid-', size=(6, 1),
+                                                           default_text=get_config_param(
+                                                               'width',
+                                                               'nl_square'))],
+                                                 [sg.Text('Height:')],
+                                                 [sg.Input(k='-nl_sq_hei-', size=(6, 1),
+                                                           default_text=get_config_param(
+                                                               'height',
+                                                               'nl_square'))],
+                                                 [sg.Text('GIMP Crop Ratio:')],
+                                                 [sg.Input(k='-nl_sq_gimp-',
+                                                           size=(6, 1),
+                                                           default_text=get_config_param(
+                                                               'gimp',
+                                                               'nl_square'))]
+                                                 ], pad=5)]]),
+                                     sg.Column([[sg.Frame('Portrait', [[sg.Text('Radius:')],
+                                                   [sg.Input(k='-nl_por_rad-',
+                                                             size=(3, 1),
+                                                             default_text=get_config_param(
+                                                                 'radius',
+                                                                 'nl_portrait'))],
+                                                   [sg.Text('Width:')],
+                                                   [sg.Input(k='-nl_por_wid-',
+                                                             size=(6, 1),
+                                                             default_text=get_config_param(
+                                                                 'width',
+                                                                 'nl_portrait'))],
+                                                   [sg.Text('Height:')],
+                                                   [sg.Input(k='-nl_por_hei-',
+                                                             size=(6, 1),
+                                                             default_text=get_config_param(
+                                                                 'height',
+                                                                 'nl_portrait'))],
+                                                   [sg.Text('GIMP Crop Ratio:')],
+                                                   [sg.Input(k='-nl_por_gimp-',
+                                                             size=(6, 1),
+                                                             default_text=get_config_param(
+                                                                 'gimp',
+                                                                 'nl_portrait'))]
+                                                   ], pad=5)]]),
+                                     sg.Column([[sg.Frame('Square', [[sg.Text('Radius:')],
+                                                 [sg.Input(k='-nl_lan_rad-',
+                                                           size=(3, 1),
+                                                           default_text=get_config_param(
+                                                               'radius',
+                                                               'nl_landscape'))],
+                                                 [sg.Text('Width:')],
+                                                 [sg.Input(k='-nl_lan_wid-',
+                                                           size=(6, 1),
+                                                           default_text=get_config_param(
+                                                               'width',
+                                                               'nl_landscape'))],
+                                                 [sg.Text('Height:')],
+                                                 [sg.Input(k='-nl_lan_hei-',
+                                                           size=(6, 1),
+                                                           default_text=get_config_param(
+                                                               'height',
+                                                               'nl_landscape'))],
+                                                 [sg.Text('GIMP Crop Ratio:')],
+                                                 [sg.Input(k='-nl_lan_gimp-',
+                                                           size=(6, 1),
+                                                           default_text=get_config_param(
+                                                               'gimp',
+                                                               'nl_landscape'))]
+                                                 ], pad=5)]])]])
+
+    window_frame = sg.Frame('Window Cling Settings', [[sg.Column([[sg.Frame('Small',
+                                                    [[sg.Text('Frame:')],
+                                                              [sg.Input(k='-w_sm_frame-',
+                                                                        size=(9, 1),
+                                                                        default_text=get_config_param(
+                                                                            'frame',
+                                                                            'wind_sm'),
+                                                                        disabled=True,
+                                                                        disabled_readonly_background_color='grey')],
+                                                              [sg.Text('Width:')],
+                                                              [sg.Input(k='-w_sm_wid-',
+                                                                        size=(6, 1),
+                                                                        default_text=get_config_param(
+                                                                            'width',
+                                                                            'wind_sm'))],
+                                                              [sg.Text('Height:')],
+                                                              [sg.Input(k='-w_sm_hei-',
+                                                                        size=(6, 1),
+                                                                        default_text=get_config_param(
+                                                                            'height',
+                                                                            'wind_sm'))]
+                                                              ], pad=5)]]),
+                                                       sg.Column([[sg.Frame('Medium',
+                                                    [[sg.Text('Frame:')],
+                                                               [sg.Input(k='-w_med_frame-',
+                                                                         size=(9, 1),
+                                                                         default_text=get_config_param(
+                                                                             'frame',
+                                                                             'wind_med'),
+                                                                         disabled=True,
+                                                                         disabled_readonly_background_color='grey')],
+                                                               [sg.Text('Width:')],
+                                                               [sg.Input(k='-w_med_wid-',
+                                                                         size=(6, 1),
+                                                                         default_text=get_config_param(
+                                                                             'width',
+                                                                             'wind_med'))],
+                                                               [sg.Text('Height:')],
+                                                               [sg.Input(k='-w_med_hei-',
+                                                                         size=(6, 1),
+                                                                         default_text=get_config_param(
+                                                                             'height',
+                                                                             'wind_med'))]
+                                                               ], pad=5)]]),
+                                                       sg.Column([[sg.Frame('Large', [[sg.Text('Frame:')],
+                                                      [sg.Input(k='-w_lrg_frame-',
+                                                                size=(9, 1),
+                                                                default_text=get_config_param(
+                                                                    'frame',
+                                                                    'wind_lrg'),
+                                                                disabled=True,
+                                                                disabled_readonly_background_color='grey')],
+                                                      [sg.Text('Width:')],
+                                                      [sg.Input(k='-w_lrg_wid-',
+                                                                size=(6, 1),
+                                                                default_text=get_config_param(
+                                                                    'width',
+                                                                    'wind_lrg'))],
+                                                      [sg.Text('Height:')],
+                                                      [sg.Input(k='-w_lrg_hei-',
+                                                                size=(6, 1),
+                                                                default_text=get_config_param(
+                                                                    'height',
+                                                                    'wind_lrg'))]
+                                                      ], pad=5)]])]])
+
     layout = [[default_frame],
+              [nl_frame],
+              [window_frame],
               [sg.Button('Save'), sg.Button('Cancel')]]
     return sg.Window('Settings', layout, finalize=True, modal=True)
 
 
 window_main, window_settings = main_window(), None
 window = None
-base_type = None
-sub_type = None
+# base_type = None
+# sub_type = None
 while True:
 
     event, values = window_main.read(timeout=100)
-
-
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         window_main.close()
@@ -268,9 +419,9 @@ while True:
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         window_main.close()
-    if window == window_main:       # if closing win 2, mark as closed
+    if window == window_main:  # if closing win 2, mark as closed
         window_main = None
-    elif window == window_settings:     # if closing win 1, mark as closed
+    elif window == window_settings:  # if closing win 1, mark as closed
         window_settings = None
 
     if values['-nightlight-'] and values['-square-']:
@@ -291,8 +442,6 @@ while True:
     elif values['-wind_cling-'] and values['-large-']:
         base_type = 'wind'
         sub_type = 'lrg'
-
-
 
     if values['-load_img_btn-'] != '':
         filename_elem = window_main['-filename-']
@@ -339,10 +488,11 @@ while True:
         print(event, values)
         print(base_type, sub_type)
 
-
     if event == '-settings_btn-':
         window = settings_window()
-
+        ###################################
+        #   Loop for the settings window
+        ###################################
         while True:
             event, values = window.read(timeout=100)
             if event != sg.TIMEOUT_KEY:
@@ -350,6 +500,10 @@ while True:
             if event == sg.WIN_CLOSED or event == 'Cancel':
                 window.close()
                 break
-        # break
+            elif event == 'Save':
+                print('you saved')
+                for k in values:
+                    print(k, values[k])
+
 
 window_main.close()
