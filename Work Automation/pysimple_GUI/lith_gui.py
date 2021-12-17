@@ -9,28 +9,44 @@ from PIL import Image
 
 
 class Lithophane:
-    def __init__(self, type, subtype):
+    def __init__(self, type):
         self.driver = None
         config = ConfigParser()
         config.read('config.ini')
         self.type = type
-        self.subtype = subtype
-        self.res = config.get(self.subtype, 'res')
-        self.width = config.get(self.subtype, 'width')
-        self.height = config.get(self.subtype, 'height')
-        self.max_thick = config.get(self.subtype, 'max_thick')
-        self.min_thick = config.get(self.subtype, 'min_thick')
-        self.user_email = config.get(self.subtype, 'user')
-        self.frame_width = config.get(self.subtype, 'frame_width')
-        self.slot_width = config.get(self.subtype, 'slot_width')
-        self.slot_depth = config.get(self.subtype, 'slot_depth')
-        self.adapt_thick = config.get(self.subtype, 'adapt_thick')
-        self.light_to_lith_dis = config.get(self.subtype, 'light_to_lith_dis')
-        self.radius = config.get(self.subtype, 'radius')
-        if self.type == 'nl':
-            self.url = config.get(self.subtype, 'nl_url')
-        elif self.type == 'wind':
-            self.url = config.get(self.subtype, 'window_url')
+        self.section = 'DEFAULT'
+        self.res = config.get(self.section, 'res')
+        self.max_thick = config.get(self.section, 'max_thick')
+        self.min_thick = config.get(self.section, 'min_thick')
+        self.frame_width = config.get(self.section, 'frame_width')
+        self.slot_width = config.get(self.section, 'slot_width')
+        self.slot_depth = config.get(self.section, 'slot_depth')
+        self.adapt_thick = config.get(self.section, 'adapt_thick')
+        self.light_to_lith_dis = config.get(self.section, 'light_to_lith_dis')
+        self.user = config.get(self.section, 'user')
+        self.nl_url = config.get(self.section, 'nl_url')
+        self.window_url = config.get(self.section, 'window_url')
+        self.nl_sq_rad = config.get(self.section, 'nl_sq_rad')
+        self.nl_sq_wid = config.get(self.section, 'nl_sq_wid')
+        self.nl_sq_hei = config.get(self.section, 'nl_sq_hei')
+        self.nl_sq_gimp = config.get(self.section, 'nl_sq_gimp')
+        self.nl_por_rad = config.get(self.section, 'nl_por_rad')
+        self.nl_por_wid = config.get(self.section, 'nl_por_wid')
+        self.nl_por_hei = config.get(self.section, 'nl_por_hei')
+        self.nl_por_gimp = config.get(self.section, 'nl_por_gimp')
+        self.nl_lan_rad = config.get(self.section, 'nl_lan_rad')
+        self.nl_lan_wid = config.get(self.section, 'nl_lan_wid')
+        self.nl_lan_hei = config.get(self.section, 'nl_lan_hei')
+        self.nl_lan_gimp = config.get(self.section, 'nl_lan_gimp')
+        self.w_sm_frame = config.get(self.section, 'w_sm_frame')
+        self.w_sm_wid = config.get(self.section, 'w_sm_wid')
+        self.w_sm_hei = config.get(self.section, 'w_sm_hei')
+        self.w_med_frame = config.get(self.section, 'w_med_frame')
+        self.w_med_wid = config.get(self.section, 'w_med_wid')
+        self.w_med_hei = config.get(self.section, 'w_med_hei')
+        self.w_lrg_frame = config.get(self.section, 'w_lrg_frame')
+        self.w_lrg_wid = config.get(self.section, 'w_lrg_wid')
+        self.w_lrg_hei = config.get(self.section, 'w_lrg_hei')
 
     def newchromebrowser(self, headless=True, downloadpath=None):
         """ Helper function that creates a new Selenium browser """
@@ -44,9 +60,12 @@ class Lithophane:
         self.driver = webdriver.Chrome(options=options)
         return self.driver
 
-    def start_browser(self, path):
+    def start_browser(self, path, _type):
         self.newchromebrowser(headless=False, downloadpath=path)
-        self.driver.get(self.url)
+        if _type == 'wind':
+            self.driver.get(self.window_url)
+        else:
+            self.driver.get(self.nl_url)
 
     def clear_fields(self):
         inputs = self.driver.find_elements_by_tag_name('input')
@@ -56,27 +75,35 @@ class Lithophane:
             except selenium.common.exceptions.InvalidElementStateException:
                 pass
 
-    def dl_wind(self, file, path):
-        self.res = config.get('default', 'res')
-        self.start_browser(path)
+    def dl_wind(self, file, path, sub_type):
+        _type = 'wind'
+        self.start_browser(path, _type)
         self.clear_fields()
         select = Select(self.driver.find_element_by_id('hole_num'))
         select.select_by_visible_text('No Border')
         self.driver.find_element_by_name('fileToUpload').send_keys(file)
-        self.driver.find_element_by_id('lith_res').send_keys(self.res)
-        self.driver.find_element_by_id('base_length').send_keys(my_lith.width)
-        self.driver.find_element_by_id('height').send_keys(my_lith.height)
+        self.driver.find_element_by_id('lith_res').send_keys(my_lith.res)
         self.driver.find_element_by_id('max_thickness').send_keys(my_lith.max_thick)
         self.driver.find_element_by_id('min_thickness').send_keys(my_lith.min_thick)
-        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user_email)
+        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user)
         self.driver.find_element_by_id('x_shift').send_keys('0.5')
         self.driver.find_element_by_id('y_shift').send_keys('0.5')
         self.driver.find_element_by_id('rect_scale').send_keys('1.0')
+        if sub_type == 'sm':
+            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_sm_wid)
+            self.driver.find_element_by_id('height').send_keys(my_lith.w_sm_hei)
+        elif sub_type == 'med':
+            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_med_wid)
+            self.driver.find_element_by_id('height').send_keys(my_lith.w_med_hei)
+        else:
+            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_lrg_wid)
+            self.driver.find_element_by_id('height').send_keys(my_lith.w_lrg_hei)
         download_btn = self.driver.find_element_by_name('submit')
         download_btn.click()
 
-    def dl_nl(self, file, path):
-        self.start_browser(path)
+    def dl_nl(self, file, path, sub_type):
+        _type = 'nl'
+        self.start_browser(path, _type)
         self.clear_fields()
         self.driver.find_element_by_name('fileToUpload').send_keys(file)
         self.driver.find_element_by_id('lith_res').send_keys(my_lith.res)
@@ -87,14 +114,23 @@ class Lithophane:
         self.driver.find_element_by_id('d_slot').send_keys(my_lith.slot_depth)
         self.driver.find_element_by_id('t_base').send_keys(my_lith.adapt_thick)
         self.driver.find_element_by_id('LLS').send_keys(my_lith.light_to_lith_dis)
-        self.driver.find_element_by_id('radius').send_keys(my_lith.radius)
-        self.driver.find_element_by_id('x_span').send_keys(my_lith.width)
-        self.driver.find_element_by_id('z_dim').send_keys(my_lith.height)
-        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user_email)
-        download_btn = self.driver.find_element_by_name('submit')
+        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user)
         self.driver.find_element_by_id('x_shift').send_keys('0.5')
         self.driver.find_element_by_id('y_shift').send_keys('0.5')
         self.driver.find_element_by_id('rect_scale').send_keys('1.0')
+        if sub_type == 'square':
+            self.driver.find_element_by_id('radius').send_keys(my_lith.nl_sq_rad)
+            self.driver.find_element_by_id('x_span').send_keys(my_lith.nl_sq_wid)
+            self.driver.find_element_by_id('z_dim').send_keys(my_lith.nl_sq_hei)
+        elif sub_type == 'portrait':
+            self.driver.find_element_by_id('radius').send_keys(my_lith.nl_por_rad)
+            self.driver.find_element_by_id('x_span').send_keys(my_lith.nl_por_wid)
+            self.driver.find_element_by_id('z_dim').send_keys(my_lith.nl_por_hei)
+        else:
+            self.driver.find_element_by_id('radius').send_keys(my_lith.nl_lan_rad)
+            self.driver.find_element_by_id('x_span').send_keys(my_lith.nl_lan_wid)
+            self.driver.find_element_by_id('z_dim').send_keys(my_lith.nl_lan_hei)
+        download_btn = self.driver.find_element_by_name('submit')
         download_btn.click()
 
 
@@ -429,11 +465,11 @@ while True:
 
     if event == 'Create File':
         if window_main['-dl_path_btn-'] and window_main['-load_img_btn-'] != '':
-            my_lith = Lithophane(base_type, f'{base_type}_{sub_type}')
+            my_lith = Lithophane(base_type)
             if base_type == 'nl':
-                my_lith.dl_nl(fp, dl_path)
+                my_lith.dl_nl(fp, dl_path, sub_type)
             else:
-                my_lith.dl_wind(fp, dl_path)
+                my_lith.dl_wind(fp, dl_path, sub_type)
         else:
             sg.PopupOK(' Make sure all fields are filled in                ', title='Empty Fields')
 
