@@ -1,6 +1,11 @@
 import json
 import random
 
+'''
+Use the regex "(?<=ASHERSGIFTBOX)\d{1,6}" to find and replace coupon
+code instances in the coupon.svg file
+'''
+
 with open("used_nums.json", 'r') as f:
     used_nums = list(json.load(f))
 print(used_nums)
