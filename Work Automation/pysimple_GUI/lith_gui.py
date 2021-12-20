@@ -12,7 +12,7 @@ class Lithophane:
     def __init__(self, type):
         self.driver = None
         config = ConfigParser()
-        config.read('config.ini')
+        config.read(['./config/config.ini', './config.ini'])
         self.type = type
         self.section = 'DEFAULT'
         self.res = config.get(self.section, 'res')
@@ -269,7 +269,7 @@ def main_window():
 
 def get_config_param(option, section='DEFAULT'):
     config = ConfigParser()
-    config.read('config.ini')
+    config.read(['./config/config.ini', './config.ini'])
     return config.get(section, option).replace('%', '%%')
 
 
@@ -473,14 +473,14 @@ while True:
         else:
             sg.PopupOK(' Make sure all fields are filled in                ', title='Empty Fields')
 
-    if event != sg.TIMEOUT_KEY:
-        print(event, values)
-        print(base_type, sub_type)
+    # if event != sg.TIMEOUT_KEY:
+    #     print(event, values)
+    #     print(base_type, sub_type)
 
     if event == '-settings_btn-':
         window = settings_window()
         config = ConfigParser()
-        config.read('config.ini')
+        config.read(['./config/config.ini', './config.ini'])
 
         ###################################
         #   Loop for the settings window
@@ -494,17 +494,17 @@ while True:
                 break
             elif event == '-load_defaults-':
                 config2 = ConfigParser()
-                config2.read('default_config.ini')
+                config2.read(['./default_config.ini', './config/default_config.ini'])
                 for x in config2['DEFAULT']:
                     window[x].update(config2['DEFAULT'][x].replace('%', '%%'))
-                    print(config2['DEFAULT'][x])
+                    # print(config2['DEFAULT'][x])
             elif event == 'Save':
-                print('you saved')
+                # print('you saved')
                 for k in values:
                     if k is not None:
-                        print(k, values[k])
+                        # print(k, values[k])
                         config.set('DEFAULT', k, values[k])
-                with open('config.ini', 'w') as configfile:
+                with open('./config/config.ini', 'w') as configfile:
                     config.write(configfile)
 
 
