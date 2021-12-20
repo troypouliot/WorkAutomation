@@ -25,14 +25,10 @@ grp_label = input('Enter a label for the group: ')
 
 if num_of_nums < 1:
     print('Goodbye!')
-
 else:
-
     new_set = random.choices(available_nums, k=num_of_nums)
-
     used_nums.append({grp_label:new_set})
     with open("used_nums.json", 'w') as f:
         # indent=2 is not needed but makes the file human-readable
         json.dump(used_nums, f, indent=2)
-
     print('New set of numbers: {}'.format(new_set))
