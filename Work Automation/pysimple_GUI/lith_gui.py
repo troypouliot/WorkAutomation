@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import Select
 from configparser import ConfigParser
 from PIL import Image
 
+version = '1.1.0'
 
 class Lithophane:
     def __init__(self, type):
@@ -164,7 +165,8 @@ def main_window():
               [sg.Frame('Load Image', file_input_frame_layout, size=(300, 75))],
               [sg.Frame('Preview', image_preview_frame_layout, size=(300, 300))],
 
-              [sg.Button('Create File'), sg.Button('Exit'), sg.Button('Change Settings', key='-settings_btn-')]]
+              [sg.Button('Create File'), sg.Button('Exit'), sg.Button('Change Settings', key='-settings_btn-')],
+              [sg.Push(), sg.Text('Version: {}'.format(version), justification='right', font='Helvetica 8')]]
 
     return sg.Window('Lithophane Setup', layout, finalize=True,
                      icon=b'''iVBORw0KGgoAAAANSUhEUgAAAJIAAACrCAYAAACNDsXrAAAACXBIWX
