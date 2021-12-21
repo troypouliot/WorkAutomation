@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['lith_gui.py'],
-             pathex=['D:\\My Drive\\Programming Training\\Python\\WorkAutomation\\Work Automation\\pysimple_GUI'],
+             pathex=['D:\\My Drive\\Programming Training\\Python\\WorkAutomation\\Work Automation\\Lithophane_Generator'],
              binaries=[],
              datas=[('./config', './')],
              hiddenimports=[],
