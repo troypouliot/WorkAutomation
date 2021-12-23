@@ -32,19 +32,25 @@ def load_all_settings(path):
     return settings
 
 def format_for_table(data):
-    pass
+    lst = []
+    for i in range(0, len(data)):
+        pass
 
-path_to_ini = './data/'
-data = load_all_settings(path_to_ini)
 
-pprint.pprint(data)
 
 def num_of_rows(data):
     stuff = []
     for i in data.keys():
-
         stuff.append(len(data[i]))
     return max(stuff)
+
+
+path_to_ini = './data/'
+data_dict = load_all_settings(path_to_ini)
+pprint.pprint(data_dict)
+print(len(data_dict))
+
+
 # print(test)
 
 
