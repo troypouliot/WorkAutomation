@@ -15,14 +15,14 @@ def ini_to_dict(file):
         file_dict[item[0]] = item[1]
     return file_dict
 
-def get_table_headers(inp):
-    return list(inp.keys())
 
-def get_table_data(inp):
-    return list(inp.values())
+def get_table_headers(data):
+    return list(data.keys())
 
 
-path_to_ini = './data/'
+def get_table_data(data):
+    return list(data.values())
+
 
 def load_all_settings(path):
     settings = {}
@@ -31,22 +31,35 @@ def load_all_settings(path):
             settings[filename] = ini_to_dict(os.path.join(path, filename))
     return settings
 
-pprint.pprint(load_all_settings(path_to_ini))
+def format_for_table(data):
+    pass
 
+path_to_ini = './data/'
+data = load_all_settings(path_to_ini)
+
+pprint.pprint(data)
+
+def num_of_rows(data):
+    stuff = []
+    for i in data.keys():
+
+        stuff.append(len(data[i]))
+    return max(stuff)
 # print(test)
 
 
 # ------ Window Layout ------
-# layout = [[sg.Table(values=[get_table_data(test)], headings=['1'], max_col_width=25,
-#                     auto_size_columns=True,
-#                     display_row_numbers=True,
+# layout = [[sg.Table(values=[get_table_data(data)], headings=get_table_headers(data), max_col_width=10,
+#                     auto_size_columns=False,
+#                     display_row_numbers=False,
 #                     justification='right',
 #                     num_rows=20,
 #                     alternating_row_color='lightyellow',
+#                     vertical_scroll_only=False,
 #                     key='-TABLE-',
 #                     selected_row_colors='red on yellow',
 #                     enable_events=True,
-#                     expand_x=True,
+#                     expand_x=False,
 #                     expand_y=True,
 #                     enable_click_events=True,           # Comment out to not enable header and other clicks
 #                     tooltip='This is a table')],
@@ -57,7 +70,7 @@ pprint.pprint(load_all_settings(path_to_ini))
 #           [sg.Text('Change Colors = Changes the colors of rows 8 and 9'), sg.Sizegrip()]]
 #
 # # ------ Create Window ------
-# window = sg.Window('The Table Element', layout,
+# window = sg.Window('The Table Element', layout, size=(600,600),
 #                    ttk_theme='clam',
 #                    resizable=True)
 #
@@ -76,5 +89,5 @@ pprint.pprint(load_all_settings(path_to_ini))
 #                 col_num_clicked = event[2][1]
 #             window['-CLICKED-'].update(f'{event[2][0]},{event[2][1]}')
 # window.close()
-
-
+#
+#
