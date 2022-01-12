@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import Select
 from configparser import ConfigParser
 from PIL import Image
 
-version = '1.1.0'
+version = '1.2.0'
 
 class Lithophane:
     def __init__(self, type):
@@ -68,7 +68,7 @@ class Lithophane:
 
     def start_browser(self, path, _type):
         self.newchromebrowser(headless=False, downloadpath=path)
-        if _type == 'wind':
+        if _type == 'wind' or _type == 'box':
             self.driver.get(self.window_url)
         else:
             self.driver.get(self.nl_url)
@@ -98,6 +98,35 @@ class Lithophane:
         if sub_type == 'sm':
             self.driver.find_element_by_id('base_length').send_keys(my_lith.w_sm_wid)
             self.driver.find_element_by_id('height').send_keys(my_lith.w_sm_hei)
+        elif sub_type == 'med':
+            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_med_wid)
+            self.driver.find_element_by_id('height').send_keys(my_lith.w_med_hei)
+        else:
+            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_lrg_wid)
+            self.driver.find_element_by_id('height').send_keys(my_lith.w_lrg_hei)
+        download_btn = self.driver.find_element_by_name('submit')
+        download_btn.click()
+
+    def dl_box(self, file, path, sub_type):
+        _type = 'box'
+        self.start_browser(path, _type)
+        self.clear_fields()
+        select = Select(self.driver.find_element_by_id('hole_num'))
+        select.select_by_visible_text('Frame Only')
+        self.driver.find_element_by_name('fileToUpload').send_keys(file)
+        self.driver.find_element_by_id('lith_res').send_keys(my_lith.res)
+        self.driver.find_element_by_id('max_thickness').send_keys(my_lith.max_thick)
+        self.driver.find_element_by_id('min_thickness').send_keys(my_lith.min_thick)
+        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user)
+        self.driver.find_element_by_id('x_shift').send_keys('0.5')
+        self.driver.find_element_by_id('y_shift').send_keys('0.5')
+        self.driver.find_element_by_id('rect_scale').send_keys('1.0')
+        self.driver.find_element_by_id('base_width').send_keys(my_lith.b_frame_width)
+        self.driver.find_element_by_id('base_height').send_keys(my_lith.b_frame_height)
+        self.driver.find_element_by_id('ledge_angle').send_keys(my_lith.b_frame_angle)
+        if sub_type == 'sm':
+            self.driver.find_element_by_id('base_length').send_keys(my_lith.b_sm_size)
+            self.driver.find_element_by_id('height').send_keys(my_lith.b_sm_size)
         elif sub_type == 'med':
             self.driver.find_element_by_id('base_length').send_keys(my_lith.w_med_wid)
             self.driver.find_element_by_id('height').send_keys(my_lith.w_med_hei)
@@ -141,18 +170,18 @@ class Lithophane:
 
 
 sg.theme('DarkGrey5')
-file_types = (('JPG IMAGE', '*.jpg'), ('PNG IMAGE', '*.png'))
+file_types = (('Images', '*.jpg *.jpeg *.png *.bmp'), )
 
 
 def main_window():
     lith_type_frame_layout = [
         [sg.Radio('NightLight', "lith_type", default=True, size=(10, 1), k='-nightlight-', enable_events=True),
-         sg.Radio('Window Cling', "lith_type", default=False, size=(10, 1), k='-wind_cling-', enable_events=True)]]
+         sg.Radio('Window Cling', "lith_type", default=False, size=(10, 1), k='-wind_cling-', enable_events=True),
+         sg.Radio('Box', "lith_type", default=False, size=(10, 1), k='-box-', enable_events=True)]]
 
     sub_type_frame_layout = [[sg.pin(sg.Radio('Square', "ori", default=True, key='-square-', enable_events=True)),
                               sg.pin(sg.Radio('Portrait', "ori", default=False, key='-portrait-', enable_events=True)),
-                              sg.pin(
-                                  sg.Radio('Landscape', "ori", default=False, key='-landscape-', enable_events=True))],
+                              sg.pin(sg.Radio('Landscape', "ori", default=False, key='-landscape-', enable_events=True))],
                              [sg.pin(sg.Radio('Small', "size", default=True, key='-small-', enable_events=True)),
                               sg.pin(sg.Radio('Medium', "size", default=False, key='-medium-', enable_events=True)),
                               sg.pin(sg.Radio('Large', "size", default=False, key='-large-', enable_events=True))],
@@ -407,7 +436,8 @@ window = None
 # sub_type = None
 while True:
 
-    event, values = window_main.read(timeout=100)
+    event, values = window_main.read(timeout=1000)
+
 
     if event == sg.WIN_CLOSED or event == 'Exit':
         window_main.close()
@@ -437,6 +467,15 @@ while True:
         sub_type = 'med'
     elif values['-wind_cling-'] and values['-large-']:
         base_type = 'wind'
+        sub_type = 'lrg'
+    elif values['-box-'] and values['-small-']:
+        base_type = 'box'
+        sub_type = 'sm'
+    elif values['-box-'] and values['-medium-']:
+        base_type = 'box'
+        sub_type = 'med'
+    elif values['-box-'] and values['-large-']:
+        base_type = 'box'
         sub_type = 'lrg'
 
     if values['-load_img_btn-'] != '':
@@ -470,15 +509,27 @@ while True:
         window_main['-portrait-'].update(visible=True)
         window_main['-landscape-'].update(visible=True)
 
+    if event == '-box-':
+        window_main['-small-'].update(visible=True)
+        window_main['-medium-'].update(visible=True)
+        window_main['-large-'].update(visible=True)
+        window_main['-square-'].update(visible=False)
+        window_main['-portrait-'].update(visible=False)
+        window_main['-landscape-'].update(visible=False)
+
     if event == 'Create File':
-        if window_main['-dl_path_btn-'] and window_main['-load_img_btn-'] != '':
+        try:
             my_lith = Lithophane(base_type)
             if base_type == 'nl':
                 my_lith.dl_nl(fp, dl_path, sub_type)
+            elif base_type == 'box':
+                my_lith.dl_box(fp, dl_path, sub_type)
             else:
                 my_lith.dl_wind(fp, dl_path, sub_type)
-        else:
-            sg.PopupOK(' Make sure all fields are filled in                ', title='Empty Fields')
+        except NameError as err:
+            print(err)
+            sg.PopupOK('Make sure all fields are set', )
+
 
     # if event != sg.TIMEOUT_KEY:
     #     print(event, values)
