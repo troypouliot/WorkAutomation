@@ -48,6 +48,11 @@ class Lithophane:
         self.w_lrg_frame = config.get(self.section, 'w_lrg_frame')
         self.w_lrg_wid = config.get(self.section, 'w_lrg_wid')
         self.w_lrg_hei = config.get(self.section, 'w_lrg_hei')
+        self.b_frame = config.get(self.section, 'b_frame')
+        self.b_frame_width = config.get(self.section, 'b_frame_width')
+        self.b_frame_height = config.get(self.section, 'b_frame_height')
+        self.b_frame_angle = config.get(self.section, 'b_frame_angle')
+        self.b_sm_size = config.get(self.section, 'b_sm_size')
 
     def newchromebrowser(self, headless=True, downloadpath=None):
         """ Helper function that creates a new Selenium browser """
