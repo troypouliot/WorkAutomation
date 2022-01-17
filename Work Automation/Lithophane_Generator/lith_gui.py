@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import Select
 from configparser import ConfigParser
 from PIL import Image
 
-version = '1.2.0'
+version = '1.3.0'
 
 class Lithophane:
     def __init__(self, type):
@@ -430,6 +430,171 @@ def settings_window():
     return sg.Window('Settings', layout, finalize=True, modal=True, resizable=True)
 
 
+def settings_window_tabbed():
+    default_tab = [[sg.Column([[sg.Text('Resolution:')],
+                  [sg.Input(k='res', size=(3, 1),
+                            default_text=get_config_param('res'))],
+                  [sg.Text('Adapter Thickness:')],
+                  [sg.Input(k='adapt_thick', size=(4, 1),
+                            default_text=get_config_param('adapt_thick'))],
+                  [sg.Text('Light to Lith Distance:')],
+                  [sg.Input(k='light_to_lith_dis', size=(3, 1),
+                            default_text=get_config_param('light_to_lith_dis'))],
+                  [sg.Text('User:')],
+                  [sg.Input(k='user', size=(20,1),
+                            default_text=get_config_param('user'))],
+                  [sg.Text('Nightlight URL:')],
+                  [sg.Input(k='nl_url', size=(20,1),
+                            default_text=get_config_param('nl_url'))],
+                  [sg.Text('Window URL:')],
+                  [sg.Input(k='window_url', size=(20,1),
+                            default_text=get_config_param('window_url'))]
+                  ], vertical_alignment='top'),
+       sg.Column([[sg.Text('Minimum Thickness:')],
+                  [sg.Input(k='min_thick', size=(3, 1),
+                            default_text=get_config_param('min_thick'))],
+                  [sg.Text('Maximum Thickness:')],
+                  [sg.Input(k='max_thick', size=(3, 1),
+                            default_text=get_config_param('max_thick'))],
+                  [sg.Text('Frame Width:')],
+                  [sg.Input(k='frame_width', size=(3, 1),
+                            default_text=get_config_param('frame_width'))],
+                  [sg.Text('Slot Width:')],
+                  [sg.Input(k='slot_width', size=(4, 1),
+                            default_text=get_config_param('slot_width'))],
+                  [sg.Text('Slot Depth:')],
+                  [sg.Input(k='slot_depth', size=(4, 1),
+                            default_text=get_config_param('slot_depth'))]], vertical_alignment='top')]]
+    nl_tab = [[sg.Column([[sg.Frame('Square', [[sg.Text('Radius:')],
+                         [sg.Input(k='nl_sq_rad', size=(3, 1),
+                                   default_text=get_config_param('nl_sq_rad'))],
+                         [sg.Text('Width:')],
+                         [sg.Input(k='nl_sq_wid', size=(6, 1),
+                                   default_text=get_config_param('nl_sq_wid'))],
+                         [sg.Text('Height:')],
+                         [sg.Input(k='nl_sq_hei', size=(6, 1),
+                                   default_text=get_config_param('nl_sq_hei'))],
+                         [sg.Text('GIMP Crop Ratio:')],
+                         [sg.Input(k='nl_sq_gimp', size=(6, 1),
+                                   default_text=get_config_param('nl_sq_gimp'))]
+                         ], pad=5)]]),
+     sg.Column([[sg.Frame('Portrait', [[sg.Text('Radius:')],
+                           [sg.Input(k='nl_por_rad', size=(3, 1),
+                                     default_text=get_config_param('nl_por_rad'))],
+                           [sg.Text('Width:')],
+                           [sg.Input(k='nl_por_wid', size=(6, 1),
+                                     default_text=get_config_param('nl_por_wid'))],
+                           [sg.Text('Height:')],
+                           [sg.Input(k='nl_por_hei', size=(6, 1),
+                                     default_text=get_config_param('nl_por_hei'))],
+                           [sg.Text('GIMP Crop Ratio:')],
+                           [sg.Input(k='nl_por_gimp', size=(6, 1),
+                                     default_text=get_config_param('nl_por_gimp'))]
+                           ], pad=5)]]),
+     sg.Column([[sg.Frame('Square', [[sg.Text('Radius:')],
+                             [sg.Input(k='nl_lan_rad', size=(3, 1),
+                                       default_text=get_config_param('nl_lan_rad'))],
+                             [sg.Text('Width:')],
+                             [sg.Input(k='nl_lan_wid', size=(6, 1),
+                                       default_text=get_config_param('nl_lan_wid'))],
+                             [sg.Text('Height:')],
+                             [sg.Input(k='nl_lan_hei', size=(6, 1),
+                                       default_text=get_config_param('nl_lan_hei'))],
+                             [sg.Text('GIMP Crop Ratio:')],
+                             [sg.Input(k='nl_lan_gimp', size=(6, 1),
+                                       default_text=get_config_param('nl_lan_gimp'))]
+                             ], pad=5)]])]]
+
+    window_tab = [[sg.Column([[sg.Frame('Small',
+                                [[sg.Text('Frame:')],
+                                 [sg.Input(k='w_sm_frame', size=(9, 1),
+                                           default_text=get_config_param('w_sm_frame'),
+                                           disabled=True,
+                                           disabled_readonly_background_color='grey')],
+                                 [sg.Text('Width:')],
+                                 [sg.Input(k='w_sm_wid', size=(6, 1),
+                                           default_text=get_config_param('w_sm_wid'))],
+                                 [sg.Text('Height:')],
+                                 [sg.Input(k='w_sm_hei', size=(6, 1),
+                                           default_text=get_config_param('w_sm_hei'))]
+                                 ], pad=5)]]),
+           sg.Column([[sg.Frame('Medium',
+                                [[sg.Text('Frame:')],
+                                 [sg.Input(k='w_med_frame', size=(9, 1),
+                                           default_text=get_config_param('w_med_frame'),
+                                           disabled=True,
+                                           disabled_readonly_background_color='grey')],
+                                 [sg.Text('Width:')],
+                                 [sg.Input(k='w_med_wid', size=(6, 1),
+                                           default_text=get_config_param('w_med_wid'))],
+                                 [sg.Text('Height:')],
+                                 [sg.Input(k='w_med_hei', size=(6, 1),
+                                           default_text=get_config_param('w_med_hei'))]
+                                 ], pad=5)]]),
+           sg.Column([[sg.Frame('Large', [[sg.Text('Frame:')],
+                                      [sg.Input(k='w_lrg_frame', size=(9, 1),
+                                                default_text=get_config_param('w_lrg_frame'),
+                                                disabled=True,
+                                                disabled_readonly_background_color='grey')],
+                                      [sg.Text('Width:')],
+                                      [sg.Input(k='w_lrg_wid', size=(6, 1),
+                                                default_text=get_config_param('w_lrg_wid'))],
+                                      [sg.Text('Height:')],
+                                      [sg.Input(k='w_lrg_hei', size=(6, 1),
+                                                default_text=get_config_param('w_lrg_hei'))]
+                                      ], pad=5)]])]]
+
+    box_tab = [[sg.Column([[sg.Frame('Small',
+                                        [[sg.Text('Size:')],
+                                         [sg.Input(k='b_sm_size', size=(3, 1),
+                                                   default_text=get_config_param('b_sm_size'))],
+                                        [sg.Text('Frame:')],
+                                         [sg.Input(k='b_frame', size=(12, 1),
+                                                   default_text=get_config_param('b_frame'),
+                                                   disabled=True,
+                                                   disabled_readonly_background_color='grey')],
+                                         [sg.Text('Outer Frame Thickness:')],
+                                         [sg.Input(k='b_frame_width', size=(6, 1),
+                                                   default_text=get_config_param('b_frame_width'))],
+                                         [sg.Text('Outer Frame Width:')],
+                                         [sg.Input(k='b_frame_height', size=(6, 1),
+                                                   default_text=get_config_param('b_frame_height'))],
+                                         [sg.Text('Outer Frame Angle:')],
+                                         [sg.Input(k='b_frame_angle', size=(6, 1),
+                                                   default_text=get_config_param('b_frame_angle'))]
+                                         ], pad=5)]]),
+                   # sg.Column([[sg.Frame('Medium',
+                   #                      [[sg.Text('Frame:')],
+                   #                       [sg.Input(k='box_sm_frame', size=(12, 1),
+                   #                                 default_text=get_config_param('b_frame'),
+                   #                                 disabled=True,
+                   #                                 disabled_readonly_background_color='grey')],
+                   #                       [sg.Text('Width:')],
+                   #                       [sg.Input(k='b_frame_width', size=(6, 1),
+                   #                                 default_text=get_config_param('b_frame_width'))],
+                   #                       [sg.Text('Height:')],
+                   #                       [sg.Input(k='b_frame_height', size=(6, 1),
+                   #                                 default_text=get_config_param('b_frame_height'))]
+                   #                       ], pad=5)]]),
+                   # sg.Column([[sg.Frame('Large', [[sg.Text('Frame:')],
+                   #                                [sg.Input(k='box_sm_frame', size=(12, 1),
+                   #                                          default_text=get_config_param('b_frame'),
+                   #                                          disabled=True,
+                   #                                          disabled_readonly_background_color='grey')],
+                   #                                [sg.Text('Width:')],
+                   #                                [sg.Input(k='b_frame_width', size=(6, 1),
+                   #                                          default_text=get_config_param('b_frame_width'))],
+                   #                                [sg.Text('Height:')],
+                   #                                [sg.Input(k='b_frame_height', size=(6, 1),
+                   #                                          default_text=get_config_param('b_frame_height'))]
+                   #                                ], pad=5)]])
+                ]]
+
+    layout = [[sg.TabGroup([[sg.Tab('Default', default_tab, k='-default_tab-'), sg.Tab('Nightlight', nl_tab),
+                             sg.Tab('Window', window_tab), sg.Tab('Box', box_tab)]], enable_events=True, key='-tab_group-')],
+              [[sg.Button('Save'), sg.Button('Close')], [sg.Button('Load Default Values', key='-load_defaults-')]]]
+    return sg.Window('Settings', layout, finalize=True, modal=True, resizable=True)
+
 window_main, window_settings = main_window(), None
 window = None
 # base_type = None
@@ -536,7 +701,7 @@ while True:
     #     print(base_type, sub_type)
 
     if event == '-settings_btn-':
-        window = settings_window()
+        window = settings_window_tabbed()
         config = ConfigParser()
         config.read(['./config/config.ini', './config.ini'])
 
@@ -544,9 +709,9 @@ while True:
         #   Loop for the settings window
         ###################################
         while True:
-            event, values = window.read(timeout=100)
+            event, values = window.read(timeout=1000)
             # if event != sg.TIMEOUT_KEY:
-            #     print(event, values)
+            print(values)
             if event == sg.WIN_CLOSED or event == 'Close':
                 window.close()
                 break
@@ -559,8 +724,8 @@ while True:
             elif event == 'Save':
                 # print('you saved')
                 for k in values:
-                    if k is not None:
-                        # print(k, values[k])
+                    if k is not None and k != '-tab_group-':
+                        print(k, values[k])
                         config.set('DEFAULT', k, values[k])
                 with open('./config/config.ini', 'w') as configfile:
                     config.write(configfile)
