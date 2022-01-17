@@ -1,10 +1,15 @@
 import os
 
+F_DRIVE = 'F:\\Parts\\'.lower()
+I_DRIVE = 'I:\\US\\Parts\\'.lower()
+OLD_F_LOC = 'F:\\HEATERS\\Eng\\Parts\\'.lower()
+OLD_I_LOC = 'I:\\US\\Heaters\\Eng\\Parts\\'.lower()
+TREE_1 = ['3-Design'.lower(), '3_Design'.lower(), 'CAD'.lower()]
+TREE_2 = ['304-CADCAM'.lower(), '304_CADCAM'.lower()]
 
 
 def countFiles(path):
     return len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))]) - 1
-
 
 
 def isActive(path, prefix, model_num):
@@ -37,24 +42,13 @@ def check4CADFiles(path):
     cad_file_ext = ['.M', '.CAD', '.M1', '.M2', '.M3', '.STP']
     f_count = 0
     for ext in cad_file_ext:
-        if cnt := len([name for name in os.listdir(path) if os.path.splitext(os.path.join(path, name))[1].upper() == ext]):
+        if cnt := len(
+                [name for name in os.listdir(path) if os.path.splitext(os.path.join(path, name))[1].upper() == ext]):
             f_count += cnt
     if f_count > 0:
         return True
     return False
 
-
-
-
-
-# partsList = []
-
-f_drive = 'F:\\Parts\\'.lower()
-i_drive = 'I:\\US\\Parts\\'.lower()
-old_f_loc = 'F:\\HEATERS\\Eng\\Parts\\'.lower()
-old_i_loc = 'I:\\US\\Heaters\\Eng\\Parts\\'.lower()
-tree_1 = ['3-Design'.lower(), '3_Design'.lower(), 'CAD'.lower()]
-tree_2 = ['304-CADCAM'.lower(), '304_CADCAM'.lower()]
 
 ###########################################################################
 #   Use this to find specific model prefixes in the current F folder location
@@ -62,17 +56,18 @@ tree_2 = ['304-CADCAM'.lower(), '304_CADCAM'.lower()]
 def find_cur_f_loc(pre):
     # partPrefix = input('What model prefix are you looking for? ').upper()
     partPrefix = pre
-    for folderName, subfolders, filenames in os.walk(f_drive):
+    for folderName, subfolders, filenames in os.walk(F_DRIVE):
         for sub in subfolders:
-            for folderName1, subfolders1, filenames1 in os.walk(os.path.join(f_drive, sub)):
+            for folderName1, subfolders1, filenames1 in os.walk(os.path.join(F_DRIVE, sub)):
                 for sub1 in subfolders1:
                     if sub1.endswith(partPrefix):
-                        modelpath = os.path.join(f_drive, sub, sub1)
-                        for tree1 in tree_1:
+                        modelpath = os.path.join(F_DRIVE, sub, sub1)
+                        for tree1 in TREE_1:
                             if os.path.exists(os.path.normcase(os.path.join(modelpath, tree1))):
-                                for tree2 in tree_2:
+                                for tree2 in TREE_2:
                                     if os.path.exists(os.path.join(modelpath, tree1, tree2)):
-                                        if os.path.exists(os.path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
+                                        if os.path.exists(
+                                                os.path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
                                             print(partPrefix, sub1.split(partPrefix)[0])
                                             # partsList.append(modelpath.upper())
                 break
@@ -85,7 +80,7 @@ def find_cur_f_loc(pre):
 def find_old_f_loc(pre=''):
     pre = pre.upper()
     my_list = []
-    for folderName, subfolders, filenames in os.walk(old_f_loc):
+    for folderName, subfolders, filenames in os.walk(OLD_F_LOC):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in os.walk(os.path.join(folderName, sub)):
                 for sub1 in subfolders1:
@@ -99,7 +94,7 @@ def find_old_f_loc(pre=''):
                         else:
                             print(my_list[-1])
                         continue
-                    for tree1 in tree_1:
+                    for tree1 in TREE_1:
                         if os.path.exists(os.path.normcase(os.path.join(modelpath, tree1))):
                             if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1))):
                                 my_list.append(isActive(os.path.join(folderName, sub, sub1, tree1), '', sub1))
@@ -110,18 +105,19 @@ def find_old_f_loc(pre=''):
                                 else:
                                     print(my_list[-1])
                                 continue
-                            tree_2.append(sub1)
-                            for tree2 in tree_2:
+                            TREE_2.append(sub1)
+                            for tree2 in TREE_2:
                                 if os.path.exists(os.path.join(modelpath, tree1, tree2)):
                                     if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1, tree2))):
-                                        my_list.append(isActive(os.path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
+                                        my_list.append(
+                                            isActive(os.path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
                                         if pre == '':
                                             continue
                                         if my_list[-1][0] != pre:
                                             my_list.pop()
                                         else:
                                             print(my_list[-1])
-                            tree_2.pop()    #  remove the sub1 item that was added to the tree_2 list since it is specific to the model
+                            TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                 break
         break
     return '{} models found'.format(len(my_list)), my_list
@@ -132,21 +128,23 @@ def find_old_f_loc(pre=''):
 #################################################################################
 def find_cur_i_loc(pre):
     partPrefix = pre
-    for folderName, subfolders, filenames in os.walk(i_drive):
+    for folderName, subfolders, filenames in os.walk(I_DRIVE):
         for sub in subfolders:
-            for folderName1, subfolders1, filenames1 in os.walk(os.path.join(i_drive, sub)):
+            for folderName1, subfolders1, filenames1 in os.walk(os.path.join(I_DRIVE, sub)):
                 for sub1 in subfolders1:
                     if sub1.endswith(partPrefix):
-                        modelpath = os.path.join(i_drive, sub, sub1)
-                        for tree1 in tree_1:
+                        modelpath = os.path.join(I_DRIVE, sub, sub1)
+                        for tree1 in TREE_1:
                             if os.path.exists(os.path.normcase(os.path.join(modelpath, tree1))):
-                                for tree2 in tree_2:
+                                for tree2 in TREE_2:
                                     if os.path.exists(os.path.join(modelpath, tree1, tree2)):
-                                        if os.path.exists(os.path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
+                                        if os.path.exists(
+                                                os.path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
                                             print(partPrefix, sub1.split(partPrefix)[0])
                                             # partsList.append(modelpath.upper())
                 break
         break
+
 
 #################################################################################
 #   Use this to find specific model prefixes in the old I folder location       #
@@ -154,7 +152,7 @@ def find_cur_i_loc(pre):
 def find_old_i_loc(pre=''):
     pre = pre.upper()
     my_list = []
-    for folderName, subfolders, filenames in os.walk(old_i_loc):
+    for folderName, subfolders, filenames in os.walk(OLD_I_LOC):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in os.walk(os.path.join(folderName, sub)):
                 for sub1 in subfolders1:
@@ -166,7 +164,7 @@ def find_old_i_loc(pre=''):
                         if my_list[-1][0] != pre:
                             my_list.pop()
                         continue
-                    for tree1 in tree_1:
+                    for tree1 in TREE_1:
                         if os.path.exists(os.path.normcase(os.path.join(modelpath, tree1))):
                             if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1))):
                                 my_list.append(isActive(os.path.join(folderName, sub, sub1, tree1), '', sub1))
@@ -175,22 +173,20 @@ def find_old_i_loc(pre=''):
                                 if my_list[-1][0] != pre:
                                     my_list.pop()
                                 continue
-                            tree_2.append(sub1)
-                            for tree2 in tree_2:
+                            TREE_2.append(sub1)
+                            for tree2 in TREE_2:
                                 if os.path.exists(os.path.join(modelpath, tree1, tree2)):
                                     if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1, tree2))):
-                                        my_list.append(isActive(os.path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
+                                        my_list.append(
+                                            isActive(os.path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
                                         if pre == '':
                                             continue
                                         if my_list[-1][0] != pre:
                                             my_list.pop()
-                            tree_2.pop()    #  remove the sub1 item that was added to the tree_2 list since it is specific to the model
+                            TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                 break
         break
     return '{} models found'.format(len(my_list)), my_list
-
-
-
 
 
 # print(find_old_i_loc('hr'))
