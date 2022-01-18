@@ -27,11 +27,7 @@ def isActive(path, prefix, model_num):
             if len(_) > 1:
                 pre.append(_.upper())
         if len(pre) > 0:
-            # if max(set(pre), key=pre.count) == prefix:
-            # print(max(set(pre), key=pre.count), model_num)
             return max(set(pre), key=pre.count), model_num
-            # else:
-            #     return None
         else:
             return 'NA'
     else:
@@ -49,13 +45,20 @@ def check4CADFiles(path):
         return True
     return False
 
+def countsubfolders(path):
+    total_parts = 0
+    for folderName, subfolders, filenames in os.walk(path):
+        subs_for_counting = [f for f in subfolders if f.isnumeric()]
+        for sub in subs_for_counting:
+            total_parts += len(os.listdir(os.path.join(path, sub)))
+        return total_parts
 
 ###########################################################################
 #   Use this to find specific model prefixes in the current F folder location
 ###########################################################################
 def find_cur_f_loc(pre):
-    # partPrefix = input('What model prefix are you looking for? ').upper()
-    partPrefix = pre
+    partPrefix = pre.upper()
+    partcount = 0
     for folderName, subfolders, filenames in os.walk(F_DRIVE):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in os.walk(os.path.join(F_DRIVE, sub)):
@@ -68,10 +71,11 @@ def find_cur_f_loc(pre):
                                     if os.path.exists(os.path.join(modelpath, tree1, tree2)):
                                         if os.path.exists(
                                                 os.path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
+                                            partcount += 1
                                             print(partPrefix, sub1.split(partPrefix)[0])
-                                            # partsList.append(modelpath.upper())
                 break
         break
+    print('DONE! \nFound {} active models. in the "{}" location.'.format(partcount, F_DRIVE.upper()))
 
 
 ###########################################################################
@@ -79,55 +83,56 @@ def find_cur_f_loc(pre):
 ###########################################################################
 def find_old_f_loc(pre=''):
     pre = pre.upper()
-    my_list = []
+    model_list = []
     for folderName, subfolders, filenames in os.walk(OLD_F_LOC):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in os.walk(os.path.join(folderName, sub)):
                 for sub1 in subfolders1:
                     modelpath = os.path.normcase(os.path.join(folderName, sub, sub1))
                     if check4CADFiles(modelpath) is True:
-                        my_list.append(isActive(os.path.join(folderName, sub, sub1), '', sub1))
+                        model_list.append(isActive(os.path.join(folderName, sub, sub1), '', sub1))
                         if pre == '':
                             continue
-                        if my_list[-1][0] != pre:
-                            my_list.pop()
+                        if model_list[-1][0] != pre:
+                            model_list.pop()
                         else:
-                            print(my_list[-1])
+                            print(model_list[-1])
                         continue
                     for tree1 in TREE_1:
                         if os.path.exists(os.path.normcase(os.path.join(modelpath, tree1))):
                             if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1))):
-                                my_list.append(isActive(os.path.join(folderName, sub, sub1, tree1), '', sub1))
+                                model_list.append(isActive(os.path.join(folderName, sub, sub1, tree1), '', sub1))
                                 if pre == '':
                                     continue
-                                if my_list[-1][0] != pre:
-                                    my_list.pop()
+                                if model_list[-1][0] != pre:
+                                    model_list.pop()
                                 else:
-                                    print(my_list[-1])
+                                    print(model_list[-1])
                                 continue
                             TREE_2.append(sub1)
                             for tree2 in TREE_2:
                                 if os.path.exists(os.path.join(modelpath, tree1, tree2)):
                                     if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1, tree2))):
-                                        my_list.append(
+                                        model_list.append(
                                             isActive(os.path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
                                         if pre == '':
                                             continue
-                                        if my_list[-1][0] != pre:
-                                            my_list.pop()
+                                        if model_list[-1][0] != pre:
+                                            model_list.pop()
                                         else:
-                                            print(my_list[-1])
+                                            print(model_list[-1])
                             TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                 break
         break
-    return '{} models found'.format(len(my_list)), my_list
+    return '{} models found'.format(len(model_list))
 
 
 #################################################################################
 #   Use this to find specific model prefixes in the current I folder location   #
 #################################################################################
 def find_cur_i_loc(pre):
-    partPrefix = pre
+    partPrefix = pre.upper()
+    partcount = 0
     for folderName, subfolders, filenames in os.walk(I_DRIVE):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in os.walk(os.path.join(I_DRIVE, sub)):
@@ -141,57 +146,61 @@ def find_cur_i_loc(pre):
                                         if os.path.exists(
                                                 os.path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
                                             print(partPrefix, sub1.split(partPrefix)[0])
-                                            # partsList.append(modelpath.upper())
+                                            partcount += 1
                 break
         break
-
+    print('DONE! \nFound {} active models. in the "{}" location.'.format(partcount, I_DRIVE.upper()))
 
 #################################################################################
 #   Use this to find specific model prefixes in the old I folder location       #
 #################################################################################
-def find_old_i_loc(pre=''):
+def find_old_i_loc(pre):
     pre = pre.upper()
-    my_list = []
+    model_list = []
     for folderName, subfolders, filenames in os.walk(OLD_I_LOC):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in os.walk(os.path.join(folderName, sub)):
                 for sub1 in subfolders1:
                     modelpath = os.path.normcase(os.path.join(folderName, sub, sub1))
                     if check4CADFiles(modelpath) is True:
-                        my_list.append(isActive(os.path.join(folderName, sub, sub1), '', sub1))
+                        model_list.append(isActive(os.path.join(folderName, sub, sub1), '', sub1))
                         if pre == '':
                             continue
-                        if my_list[-1][0] != pre:
-                            my_list.pop()
+                        if model_list[-1][0] != pre:
+                            model_list.pop()
+                        else:
+                            print(model_list[-1])
                         continue
                     for tree1 in TREE_1:
                         if os.path.exists(os.path.normcase(os.path.join(modelpath, tree1))):
                             if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1))):
-                                my_list.append(isActive(os.path.join(folderName, sub, sub1, tree1), '', sub1))
+                                model_list.append(isActive(os.path.join(folderName, sub, sub1, tree1), '', sub1))
                                 if pre == '':
                                     continue
-                                if my_list[-1][0] != pre:
-                                    my_list.pop()
+                                if model_list[-1][0] != pre:
+                                    model_list.pop()
+                                else:
+                                    print(model_list[-1])
                                 continue
                             TREE_2.append(sub1)
                             for tree2 in TREE_2:
                                 if os.path.exists(os.path.join(modelpath, tree1, tree2)):
                                     if check4CADFiles(os.path.normcase(os.path.join(modelpath, tree1, tree2))):
-                                        my_list.append(
+                                        model_list.append(
                                             isActive(os.path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
                                         if pre == '':
                                             continue
-                                        if my_list[-1][0] != pre:
-                                            my_list.pop()
+                                        if model_list[-1][0] != pre:
+                                            model_list.pop()
+                                        else:
+                                            print(model_list[-1])
                             TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                 break
         break
-    return '{} models found'.format(len(my_list)), my_list
+    return '{} models found'.format(len(model_list))
 
 
-# print(find_old_i_loc('hr'))
-
-
-# find_cur_i_loc('HSAP')
-find_cur_f_loc('HSK')
-# find_old_f_loc('HSFAP')
+print(find_old_i_loc('hk'))
+# find_cur_i_loc('Hk')
+# find_cur_f_loc('Hk')
+# find_old_f_loc('HK')
