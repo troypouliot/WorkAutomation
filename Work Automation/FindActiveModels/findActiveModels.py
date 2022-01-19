@@ -1,5 +1,6 @@
 from os import path, listdir, walk
 import PySimpleGUI as sg
+import threading
 
 F_DRIVE = 'F:\\Parts\\'.lower()
 I_DRIVE = 'I:\\US\\Parts\\'.lower()
@@ -47,15 +48,18 @@ def check4CADFiles(dir_path):
         return True
     return False
 
+
 def emptyprefix():
-    mline.update('Please enter a model prefix to search.\n', append=True)
+    window['-MLINE_KEY-'].update('Please enter a model prefix to search.\n', append=True)
     return
+
 
 def find_cur_f_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        mline.update('Searching the {} location...\n'.format(F_DRIVE.upper()), append=True)
+        window['-stop-'].update(visible=True)
+        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(F_DRIVE.upper()), append=True)
         partPrefix = pre.upper()
         partcount = 0
         for folderName, subfolders, filenames in walk(F_DRIVE):
@@ -72,17 +76,19 @@ def find_cur_f_loc(pre=''):
                                                     path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
                                                 partcount += 1
                                                 # print(partPrefix, sub1.split(partPrefix)[0])
-                                                mline.update('{}\n'.format(partPrefix + ' ' + sub1.split(partPrefix)[0]), append=True)
+                                                window['-MLINE_KEY-'].update('{}\n'.format(partPrefix + ' ' + sub1.split(partPrefix)[0]), append=True)
                     break
             break
-        mline.update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, F_DRIVE.upper()), append=True)
+        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, F_DRIVE.upper()), append=True)
+        window['-stop-'].update(visible=False)
 
 
 def find_old_f_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        mline.update('Searching the {} location...\n'.format(OLD_F_LOC.upper()), append=True)
+        window['-stop-'].update(visible=True)
+        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(OLD_F_LOC.upper()), append=True)
         pre = pre.upper()
         model_list = []
         for folderName, subfolders, filenames in walk(OLD_F_LOC):
@@ -97,7 +103,7 @@ def find_old_f_loc(pre=''):
                             if model_list[-1][0] != pre:
                                 model_list.pop()
                             else:
-                                mline.update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
                             continue
                         for tree1 in TREE_1:
                             if path.exists(path.normcase(path.join(modelpath, tree1))):
@@ -108,7 +114,7 @@ def find_old_f_loc(pre=''):
                                     if model_list[-1][0] != pre:
                                         model_list.pop()
                                     else:
-                                        mline.update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                        window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
                                     continue
                                 TREE_2.append(sub1)
                                 for tree2 in TREE_2:
@@ -121,18 +127,20 @@ def find_old_f_loc(pre=''):
                                             if model_list[-1][0] != pre:
                                                 model_list.pop()
                                             else:
-                                                mline.update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
                                 TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                     break
             break
-        mline.update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_F_LOC.upper()), append=True)
+        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_F_LOC.upper()), append=True)
+        window['-stop-'].update(visible=False)
 
 
 def find_cur_i_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        mline.update('Searching the {} location...\n'.format(I_DRIVE.upper()), append=True)
+        window['-stop-'].update(visible=True)
+        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(I_DRIVE.upper()), append=True)
         partPrefix = pre.upper()
         partcount = 0
         for folderName, subfolders, filenames in walk(I_DRIVE):
@@ -149,17 +157,19 @@ def find_cur_i_loc(pre=''):
                                                     path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
                                                 # print(partPrefix, sub1.split(partPrefix)[0])
                                                 partcount += 1
-                                                mline.update('{}\n'.format(partPrefix + ' ' + sub1.split(partPrefix)[0]), append=True)
+                                                window['-MLINE_KEY-'].update('{}\n'.format(partPrefix + ' ' + sub1.split(partPrefix)[0]), append=True)
                     break
             break
-        mline.update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, I_DRIVE.upper()), append=True)
+        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, I_DRIVE.upper()), append=True)
+        window['-stop-'].update(visible=False)
 
 
 def find_old_i_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        mline.update('Searching the {} location...\n'.format(OLD_I_LOC.upper()), append=True)
+        window['-stop-'].update(visible=True)
+        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(OLD_I_LOC.upper()), append=True)
         pre = pre.upper()
         model_list = []
         for folderName, subfolders, filenames in walk(OLD_I_LOC):
@@ -174,7 +184,7 @@ def find_old_i_loc(pre=''):
                             if model_list[-1][0] != pre:
                                 model_list.pop()
                             else:
-                                mline.update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
                             continue
                         for tree1 in TREE_1:
                             if path.exists(path.normcase(path.join(modelpath, tree1))):
@@ -185,7 +195,7 @@ def find_old_i_loc(pre=''):
                                     if model_list[-1][0] != pre:
                                         model_list.pop()
                                     else:
-                                        mline.update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                        window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
                                     continue
                                 TREE_2.append(sub1)
                                 for tree2 in TREE_2:
@@ -198,43 +208,42 @@ def find_old_i_loc(pre=''):
                                             if model_list[-1][0] != pre:
                                                 model_list.pop()
                                             else:
-                                                mline.update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
                                 TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                     break
             break
-        mline.update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_I_LOC.upper()), append=True)
+        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_I_LOC.upper()), append=True)
+        window['-stop-'].update(visible=False)
 
 
-MLINE_KEY = '-ML-'+sg.WRITE_ONLY_KEY
+
 
 layout = [  [sg.Text('Model prefix to search for:'), sg.Input(key='-prefix-', size=(5))],
             [sg.Button('Search Current F Drive', key='-search_cur_f-'), sg.Button('Search Current I Drive', key='-search_cur_i-'),
              sg.Button('Search Old F Drive', key='-search_old_f-'), sg.Button('Search Old I Drive', key='-search_old_i-')],
-            [sg.Text('Search Results:', font='Any 18')],
-            [sg.Multiline(size=(80,20), key=MLINE_KEY, write_only=True, auto_refresh=True, autoscroll=True, disabled=True)],
+            [sg.Text('Search Results:', font='Any 18'), sg.Button('Stop Search', key='-stop-', visible=False, button_color=('black', 'red'))],
+            [sg.Multiline(size=(80,20), key='-MLINE_KEY-', write_only=True, auto_refresh=True, autoscroll=True, disabled=True)],
             [sg.Button('Quit', key='-quit-')]]
 
 window = sg.Window('Minco Active Model Finder', layout)
-mline:sg.Multiline = window[MLINE_KEY]
+
 
 while True:
-    event, values = window.read()
-    # print(event, values)
+    event, values = window.read(timeout=500)
+    print(event, values)
 
     if event in (sg.WIN_CLOSED, 'Exit', '-quit-'):
         break
     elif event == '-search_cur_f-':
-        find_cur_f_loc(str(window['-prefix-'].get()))
+        find_cur_f_loc(window['-prefix-'].get())
     elif event == '-search_cur_i-':
-        find_cur_i_loc(str(window['-prefix-'].get()))
+        find_cur_i_loc(window['-prefix-'].get())
     elif event == '-search_old_f-':
-        find_old_f_loc(str(window['-prefix-'].get()))
+        find_old_f_loc(window['-prefix-'].get())
     elif event == '-search_old_i-':
-        find_old_i_loc(str(window['-prefix-'].get()))
+        find_old_i_loc(window['-prefix-'].get())
+    elif event == '-stop-':
+        pass
 
 window.close()
 
-# find_old_i_loc('hk')
-# find_cur_i_loc('Hk')
-# find_cur_f_loc('fHk')
-# find_old_f_loc('HK')
