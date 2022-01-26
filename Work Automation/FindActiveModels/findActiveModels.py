@@ -1,6 +1,6 @@
 from os import path, listdir, walk
 import PySimpleGUI as sg
-import threading
+import json
 
 F_DRIVE = 'F:\\Parts\\'.lower()
 I_DRIVE = 'I:\\US\\Parts\\'.lower()
@@ -58,7 +58,7 @@ def find_cur_f_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        window['-stop-'].update(visible=True)
+
         window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(F_DRIVE.upper()), append=True)
         partPrefix = pre.upper()
         partcount = 0
@@ -80,14 +80,13 @@ def find_cur_f_loc(pre=''):
                     break
             break
         window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, F_DRIVE.upper()), append=True)
-        window['-stop-'].update(visible=False)
+
 
 
 def find_old_f_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        window['-stop-'].update(visible=True)
         window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(OLD_F_LOC.upper()), append=True)
         pre = pre.upper()
         model_list = []
@@ -132,14 +131,12 @@ def find_old_f_loc(pre=''):
                     break
             break
         window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_F_LOC.upper()), append=True)
-        window['-stop-'].update(visible=False)
 
 
 def find_cur_i_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        window['-stop-'].update(visible=True)
         window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(I_DRIVE.upper()), append=True)
         partPrefix = pre.upper()
         partcount = 0
@@ -161,14 +158,13 @@ def find_cur_i_loc(pre=''):
                     break
             break
         window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, I_DRIVE.upper()), append=True)
-        window['-stop-'].update(visible=False)
+
 
 
 def find_old_i_loc(pre=''):
     if pre == '':
         emptyprefix()
     else:
-        window['-stop-'].update(visible=True)
         window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(OLD_I_LOC.upper()), append=True)
         pre = pre.upper()
         model_list = []
@@ -213,17 +209,46 @@ def find_old_i_loc(pre=''):
                     break
             break
         window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_I_LOC.upper()), append=True)
-        window['-stop-'].update(visible=False)
 
 
+def find_all_cur_f_loc():
+
+    window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(F_DRIVE.upper()), append=True)
+    # partPrefix = pre.upper()
+    partcount = 0
+    for folderName, subfolders, filenames in walk(F_DRIVE):
+        for sub in subfolders:
+            for folderName1, subfolders1, filenames1 in walk(path.join(F_DRIVE, sub)):
+                for sub1 in subfolders1:
+
+                    # if sub1.endswith(partPrefix):
+                    modelpath = path.join(F_DRIVE, sub, sub1)
+                    for tree1 in TREE_1:
+
+                        if path.exists(path.normcase(path.join(modelpath, tree1))):
+                            for tree2 in TREE_2:
+
+                                if path.exists(path.join(modelpath, tree1, tree2)):
+                                    if path.exists(
+                                            path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
+                                        partcount += 1
+                                        # print(partPrefix, sub1.split(partPrefix)[0])
+                                        window['-MLINE_KEY-'].update('{}\n'.format(sub1), append=True)
+                break
+        break
+    window['-MLINE_KEY-'].update('DONE! \nFound {} active models. in the "{}" location.\n'.format(partcount, F_DRIVE.upper()), append=True)
+
+
+def reindex():
+    find_cur_f_loc()
 
 
 layout = [  [sg.Text('Model prefix to search for:'), sg.Input(key='-prefix-', size=(5))],
             [sg.Button('Search Current F Drive', key='-search_cur_f-'), sg.Button('Search Current I Drive', key='-search_cur_i-'),
              sg.Button('Search Old F Drive', key='-search_old_f-'), sg.Button('Search Old I Drive', key='-search_old_i-')],
-            [sg.Text('Search Results:', font='Any 18'), sg.Button('Stop Search', key='-stop-', visible=False, button_color=('black', 'red'))],
+            [sg.Text('Search Results:', font='Any 18')],
             [sg.Multiline(size=(80,20), key='-MLINE_KEY-', write_only=True, auto_refresh=True, autoscroll=True, disabled=True)],
-            [sg.Button('Quit', key='-quit-')]]
+            [sg.Button('Quit', key='-quit-'), sg.Push(), sg.Text('This will take a long time -->'), sg.Button('Re-Index Database', button_color='red', key='-index-')]]
 
 window = sg.Window('Minco Active Model Finder', layout)
 
@@ -235,15 +260,15 @@ while True:
     if event in (sg.WIN_CLOSED, 'Exit', '-quit-'):
         break
     elif event == '-search_cur_f-':
-        find_cur_f_loc(window['-prefix-'].get())
+        find_all_cur_f_loc()
     elif event == '-search_cur_i-':
         find_cur_i_loc(window['-prefix-'].get())
     elif event == '-search_old_f-':
         find_old_f_loc(window['-prefix-'].get())
     elif event == '-search_old_i-':
         find_old_i_loc(window['-prefix-'].get())
-    elif event == '-stop-':
-        pass
+    elif event == '-index-':
+        reindex()
 
 window.close()
 
