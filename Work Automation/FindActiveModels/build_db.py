@@ -36,6 +36,7 @@ def isActive(dir_path, prefix, model_num):
         return 'NA'
 
 
+
 def check4CADFiles(dir_path):
     cad_file_ext = ['.M', '.CAD', '.M1', '.M2', '.M3', '.STP']
     f_count = 0

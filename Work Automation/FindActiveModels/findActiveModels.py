@@ -233,6 +233,7 @@ def reindex_thread(window):
     window['-db_date-'].update('Last database index: {}'.format(read_db()['DB Date']))
     window.write_event_value('-Indexing Done-', '')
 
+
 def reindex():
     threading.Thread(target=reindex_thread, args=(window,), daemon=True).start()
 
