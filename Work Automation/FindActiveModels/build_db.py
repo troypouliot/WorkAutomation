@@ -1,5 +1,8 @@
 from os import walk, path, listdir
 import pickle
+import time
+import pprint
+
 F_DRIVE = 'F:\\Parts\\'.lower()
 I_DRIVE = 'I:\\US\\Parts\\'.lower()
 OLD_F_LOC = 'F:\\HEATERS\\Eng\\Parts\\'.lower()
@@ -26,7 +29,7 @@ def isActive(dir_path, prefix, model_num):
                 pre.append(_.upper())
         if len(pre) > 0:
             winner = max(set(pre), key=pre.count), model_num
-            return [winner[0], winner[1]]
+            return winner[0], winner[1]
         else:
             return 'NA'
     else:
@@ -44,55 +47,43 @@ def check4CADFiles(dir_path):
         return True
     return False
 
-def write_list(inp):
-    old_list = []
-    with open('parts_list.txt', 'r') as db:
-        for line in db.readlines():
-            old_list.append(line.strip('\n'))
-    new_list = set(inp)
-    combined = new_list.union(old_list)
-    with open('parts_list.txt', 'w') as db:
-        for part in combined:
-            db.write(part + '\n')
 
 
 
-def find_all_cur_f_loc():
-    partslist = []
+def write_dict(prefix, model):
+    global partsdict
+    partsdict['DB Date'] = time.strftime('%Y-%m-%d', time.gmtime())
+    partsdict['Models'].append((prefix, model))
+    return partsdict
+
+
+
+def find_all_cur_f_loc_dict():
     partcount = 0
     for folderName, subfolders, filenames in walk(F_DRIVE):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in walk(path.join(F_DRIVE, sub)):
                 for sub1 in subfolders1:
-
-                    # if sub1.endswith(partPrefix):
                     modelpath = path.join(F_DRIVE, sub, sub1)
                     for tree1 in TREE_1:
-
                         if path.exists(path.normcase(path.join(modelpath, tree1))):
                             for tree2 in TREE_2:
-
                                 if path.exists(path.join(modelpath, tree1, tree2)):
                                     if path.exists(
                                             path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
                                         partcount += 1
-                                        partslist.append(sub1)
-                                        print(sub1)
-                                        write_list(partslist)
+                                        # print(sub1)
+                                        write_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
                 break
         break
 
-    print('Done. Found {} active model'.format(partcount))
 
-def find_all_cur_i_loc():
-
-    partslist = []
+def find_all_cur_i_loc_dict():
     partcount = 0
     for folderName, subfolders, filenames in walk(I_DRIVE):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in walk(path.join(I_DRIVE, sub)):
                 for sub1 in subfolders1:
-
                     modelpath = path.join(I_DRIVE, sub, sub1)
                     for tree1 in TREE_1:
                         if path.exists(path.normcase(path.join(modelpath, tree1))):
@@ -100,45 +91,94 @@ def find_all_cur_i_loc():
                                 if path.exists(path.join(modelpath, tree1, tree2)):
                                     if path.exists(
                                             path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
-                                        # print(partPrefix, sub1.split(partPrefix)[0])
                                         partcount += 1
-                                        partslist.append(sub1)
-                                        print(sub1)
-                                        write_list(partslist)
+                                        # print(sub1)
+                                        write_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
                 break
         break
-    print('Done. Found {} active model'.format(partcount))
 
-def find_all_old_i_loc():
-    partslist = []
-    partcount = 0
-    model_list = []
+
+def find_all_old_i_loc_dict():
     for folderName, subfolders, filenames in walk(OLD_I_LOC):
         for sub in subfolders:
             for folderName1, subfolders1, filenames1 in walk(path.join(folderName, sub)):
                 for sub1 in subfolders1:
                     modelpath = path.normcase(path.join(folderName, sub, sub1))
                     if check4CADFiles(modelpath) is True:
-                        model_list.append(isActive(path.join(folderName, sub, sub1), '', sub1))
-                        print(model_list[-1])
+                        pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                        if pre != 'N' and len(pre) <= 5:
+                            write_dict(pre, model)
                         continue
                     for tree1 in TREE_1:
                         if path.exists(path.normcase(path.join(modelpath, tree1))):
                             if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
-                                model_list.append(isActive(path.join(folderName, sub, sub1, tree1), '', sub1))
-                                print(model_list[-1])
+                                pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                if pre != 'N' and len(pre) <= 5:
+                                    write_dict(pre, model)
                                 continue
                             TREE_2.append(sub1)
                             for tree2 in TREE_2:
                                 if path.exists(path.join(modelpath, tree1, tree2)):
                                     if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
-                                        model_list.append(
-                                            isActive(path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
-                                        print(model_list[-1])
-
+                                        pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                        if pre != 'N' and len(pre) <= 5:
+                                            write_dict(pre, model)
                             TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                 break
         break
 
+def find_all_old_f_loc_dict():
+    for folderName, subfolders, filenames in walk(OLD_F_LOC):
+        for sub in subfolders:
+            for folderName1, subfolders1, filenames1 in walk(path.join(folderName, sub)):
+                for sub1 in subfolders1:
+                    modelpath = path.normcase(path.join(folderName, sub, sub1))
+                    if check4CADFiles(modelpath) is True:
+                        pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                        if pre != 'N' and len(pre) <= 5:
+                            write_dict(pre, model)
+                        continue
+                    for tree1 in TREE_1:
+                        if path.exists(path.normcase(path.join(modelpath, tree1))):
+                            if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
+                                pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                if pre != 'N' and len(pre) <= 5:
+                                    write_dict(pre, model)
+                                continue
+                            TREE_2.append(sub1)
+                            for tree2 in TREE_2:
+                                if path.exists(path.join(modelpath, tree1, tree2)):
+                                    if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
+                                        pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                        if pre != 'N' and len(pre) <= 5:
+                                            write_dict(pre, model)
+                            TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
+                break
+        break
 
-find_all_old_i_loc()
+def save_db(dict):
+    with open('active_parts', 'wb') as db:
+        pickle.dump(dict, db)
+
+def read_db():
+    with open('active_parts', 'rb') as db:
+        return pickle.load(db)
+
+partsdict = read_db()
+# partsdict = {'DB Date': '', 'Models': []}
+
+# find_all_old_f_loc_dict()
+# find_all_old_i_loc_dict()
+# find_all_cur_i_loc_dict()
+# find_all_cur_f_loc_dict()
+
+# save_db(partsdict)
+
+
+
+# pprint.pprint(partsdict)
+print('{} models in DB'.format(len(partsdict['Models'])))
+
+for part in partsdict['Models']:
+    if part[0] == 'HSFAP':
+        print(part)

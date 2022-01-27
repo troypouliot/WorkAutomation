@@ -1,6 +1,9 @@
 from os import path, listdir, walk
 import PySimpleGUI as sg
-import json
+import pickle
+import time
+import threading
+
 
 F_DRIVE = 'F:\\Parts\\'.lower()
 I_DRIVE = 'I:\\US\\Parts\\'.lower()
@@ -30,7 +33,7 @@ def isActive(dir_path, prefix, model_num):
                 pre.append(_.upper())
         if len(pre) > 0:
             winner = max(set(pre), key=pre.count), model_num
-            return [winner[0], winner[1]]
+            return winner[0], winner[1]
         else:
             return 'NA'
     else:
@@ -49,226 +52,265 @@ def check4CADFiles(dir_path):
     return False
 
 
-def emptyprefix():
-    window['-MLINE_KEY-'].update('Please enter a model prefix to search.\n', append=True)
-    return
+def save_db(data):
 
+    try:
+        if stop_index:
+            raise StopIteration
+        with open('active_parts', 'wb') as db:
+            pickle.dump(data, db)
+    except StopIteration:
+        pass
 
-def find_cur_f_loc(pre=''):
-    if pre == '':
-        emptyprefix()
-    else:
+def read_db():
+    try:
+        with open('active_parts', 'rb') as db:
+            return pickle.load(db)
+    except FileNotFoundError:
+        blank_dict = {'DB Date': 'N/A', 'Models': []}
+        with open('active_parts', 'wb') as db:
+            pickle.dump(blank_dict, db)
 
-        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(F_DRIVE.upper()), append=True)
-        partPrefix = pre.upper()
-        partcount = 0
+def write_dict(prefix, model):
+    global partsdict
+    partsdict['DB Date'] = time.strftime('%Y-%m-%d %I:%M%p', time.localtime())
+    partsdict['Models'].append((prefix, model))
+    return partsdict
+
+def find_cur_f_loc():
+    try:
         for folderName, subfolders, filenames in walk(F_DRIVE):
             for sub in subfolders:
                 for folderName1, subfolders1, filenames1 in walk(path.join(F_DRIVE, sub)):
                     for sub1 in subfolders1:
-                        if sub1.endswith(partPrefix):
-                            modelpath = path.join(F_DRIVE, sub, sub1)
-                            for tree1 in TREE_1:
-                                if path.exists(path.normcase(path.join(modelpath, tree1))):
-                                    for tree2 in TREE_2:
-                                        if path.exists(path.join(modelpath, tree1, tree2)):
-                                            if path.exists(
-                                                    path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
-                                                partcount += 1
-                                                # print(partPrefix, sub1.split(partPrefix)[0])
-                                                window['-MLINE_KEY-'].update('{}\n'.format(partPrefix + ' ' + sub1.split(partPrefix)[0]), append=True)
+                        if stop_index:
+                            raise StopIteration
+                        modelpath = path.join(F_DRIVE, sub, sub1)
+                        for tree1 in TREE_1:
+                            if path.exists(path.normcase(path.join(modelpath, tree1))):
+                                for tree2 in TREE_2:
+                                    if path.exists(path.join(modelpath, tree1, tree2)):
+                                        if path.exists(path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
+                                            write_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+                                            window['-MLINE_KEY-'].write(sub1.strip('1234567890') + sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + '\n')
+                                            if stop_index:
+                                                raise StopIteration
                     break
             break
-        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, F_DRIVE.upper()), append=True)
+    except StopIteration:
+        pass
 
 
 
-def find_old_f_loc(pre=''):
-    if pre == '':
-        emptyprefix()
-    else:
-        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(OLD_F_LOC.upper()), append=True)
-        pre = pre.upper()
-        model_list = []
+def find_old_f_loc():
+    try:
         for folderName, subfolders, filenames in walk(OLD_F_LOC):
             for sub in subfolders:
                 for folderName1, subfolders1, filenames1 in walk(path.join(folderName, sub)):
                     for sub1 in subfolders1:
+                        if stop_index:
+                            raise StopIteration
                         modelpath = path.normcase(path.join(folderName, sub, sub1))
                         if check4CADFiles(modelpath) is True:
-                            model_list.append(isActive(path.join(folderName, sub, sub1), '', sub1))
-                            if pre == '':
-                                continue
-                            if model_list[-1][0] != pre:
-                                model_list.pop()
-                            else:
-                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                            pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                            if pre != 'N' and len(pre) <= 5:
+                                write_dict(pre, model)
+                                window['-MLINE_KEY-'].write(pre + model + '\n')
+                                if stop_index:
+                                    raise StopIteration
                             continue
                         for tree1 in TREE_1:
                             if path.exists(path.normcase(path.join(modelpath, tree1))):
                                 if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
-                                    model_list.append(isActive(path.join(folderName, sub, sub1, tree1), '', sub1))
-                                    if pre == '':
-                                        continue
-                                    if model_list[-1][0] != pre:
-                                        model_list.pop()
-                                    else:
-                                        window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                    pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                    if pre != 'N' and len(pre) <= 5:
+                                        write_dict(pre, model)
+                                        window['-MLINE_KEY-'].write(pre + model + '\n')
+                                        if stop_index:
+                                            raise StopIteration
                                     continue
                                 TREE_2.append(sub1)
                                 for tree2 in TREE_2:
                                     if path.exists(path.join(modelpath, tree1, tree2)):
                                         if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
-                                            model_list.append(
-                                                isActive(path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
-                                            if pre == '':
-                                                continue
-                                            if model_list[-1][0] != pre:
-                                                model_list.pop()
-                                            else:
-                                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                            pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                            if pre != 'N' and len(pre) <= 5:
+                                                write_dict(pre, model)
+                                                window['-MLINE_KEY-'].write(pre + model + '\n')
+                                                if stop_index:
+                                                    raise StopIteration
                                 TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                     break
             break
-        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_F_LOC.upper()), append=True)
+    except StopIteration:
+        pass
 
-
-def find_cur_i_loc(pre=''):
-    if pre == '':
-        emptyprefix()
-    else:
-        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(I_DRIVE.upper()), append=True)
-        partPrefix = pre.upper()
-        partcount = 0
+def find_cur_i_loc():
+    try:
         for folderName, subfolders, filenames in walk(I_DRIVE):
             for sub in subfolders:
                 for folderName1, subfolders1, filenames1 in walk(path.join(I_DRIVE, sub)):
                     for sub1 in subfolders1:
-                        if sub1.endswith(partPrefix):
-                            modelpath = path.join(I_DRIVE, sub, sub1)
-                            for tree1 in TREE_1:
-                                if path.exists(path.normcase(path.join(modelpath, tree1))):
-                                    for tree2 in TREE_2:
-                                        if path.exists(path.join(modelpath, tree1, tree2)):
-                                            if path.exists(
-                                                    path.join(modelpath, tree1, tree2, sub1.strip(partPrefix))):
-                                                # print(partPrefix, sub1.split(partPrefix)[0])
-                                                partcount += 1
-                                                window['-MLINE_KEY-'].update('{}\n'.format(partPrefix + ' ' + sub1.split(partPrefix)[0]), append=True)
+                        if stop_index:
+                            raise StopIteration
+                        modelpath = path.join(I_DRIVE, sub, sub1)
+                        for tree1 in TREE_1:
+                            if path.exists(path.normcase(path.join(modelpath, tree1))):
+                                for tree2 in TREE_2:
+                                    if path.exists(path.join(modelpath, tree1, tree2)):
+                                        if path.exists(
+                                                path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
+                                            write_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+                                            window['-MLINE_KEY-'].write(sub1.strip('1234567890') + sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + '\n')
+                                            if stop_index:
+                                                raise StopIteration
+
                     break
             break
-        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(partcount, partPrefix, I_DRIVE.upper()), append=True)
+    except StopIteration:
+        pass
 
 
-
-def find_old_i_loc(pre=''):
-    if pre == '':
-        emptyprefix()
-    else:
-        window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(OLD_I_LOC.upper()), append=True)
-        pre = pre.upper()
-        model_list = []
+def find_old_i_loc():
+    try:
         for folderName, subfolders, filenames in walk(OLD_I_LOC):
             for sub in subfolders:
                 for folderName1, subfolders1, filenames1 in walk(path.join(folderName, sub)):
                     for sub1 in subfolders1:
+                        if stop_index:
+                            raise StopIteration
                         modelpath = path.normcase(path.join(folderName, sub, sub1))
                         if check4CADFiles(modelpath) is True:
-                            model_list.append(isActive(path.join(folderName, sub, sub1), '', sub1))
-                            if pre == '':
-                                continue
-                            if model_list[-1][0] != pre:
-                                model_list.pop()
-                            else:
-                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                            pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                            if pre != 'N' and len(pre) <= 5:
+                                write_dict(pre, model)
+                                window['-MLINE_KEY-'].write(pre + model + '\n')
+                            if stop_index:
+                                raise StopIteration
                             continue
                         for tree1 in TREE_1:
                             if path.exists(path.normcase(path.join(modelpath, tree1))):
                                 if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
-                                    model_list.append(isActive(path.join(folderName, sub, sub1, tree1), '', sub1))
-                                    if pre == '':
-                                        continue
-                                    if model_list[-1][0] != pre:
-                                        model_list.pop()
-                                    else:
-                                        window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                    pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                    if pre != 'N' and len(pre) <= 5:
+                                        write_dict(pre, model)
+                                        window['-MLINE_KEY-'].write(pre + model + '\n')
+                                    if stop_index:
+                                        raise StopIteration
                                     continue
                                 TREE_2.append(sub1)
                                 for tree2 in TREE_2:
                                     if path.exists(path.join(modelpath, tree1, tree2)):
                                         if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
-                                            model_list.append(
-                                                isActive(path.join(folderName, sub, sub1, tree1, tree2), '', sub1))
-                                            if pre == '':
-                                                continue
-                                            if model_list[-1][0] != pre:
-                                                model_list.pop()
-                                            else:
-                                                window['-MLINE_KEY-'].update('{}\n'.format(model_list[-1][0] + ' ' + model_list[-1][1]), append=True)
+                                            pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                            if pre != 'N' and len(pre) <= 5:
+                                                write_dict(pre, model)
+                                                window['-MLINE_KEY-'].write(pre + model + '\n')
+                                            if stop_index:
+                                                raise StopIteration
                                 TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
                     break
             break
-        window['-MLINE_KEY-'].update('DONE! \nFound {} active "{}" models. in the "{}" location.\n'.format(len(model_list), pre, OLD_I_LOC.upper()), append=True)
+    except StopIteration:
+        pass
 
 
-def find_all_cur_f_loc():
-
-    window['-MLINE_KEY-'].update('Searching the {} location...\n'.format(F_DRIVE.upper()), append=True)
-    # partPrefix = pre.upper()
-    partcount = 0
-    for folderName, subfolders, filenames in walk(F_DRIVE):
-        for sub in subfolders:
-            for folderName1, subfolders1, filenames1 in walk(path.join(F_DRIVE, sub)):
-                for sub1 in subfolders1:
-
-                    # if sub1.endswith(partPrefix):
-                    modelpath = path.join(F_DRIVE, sub, sub1)
-                    for tree1 in TREE_1:
-
-                        if path.exists(path.normcase(path.join(modelpath, tree1))):
-                            for tree2 in TREE_2:
-
-                                if path.exists(path.join(modelpath, tree1, tree2)):
-                                    if path.exists(
-                                            path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
-                                        partcount += 1
-                                        # print(partPrefix, sub1.split(partPrefix)[0])
-                                        window['-MLINE_KEY-'].update('{}\n'.format(sub1), append=True)
-                break
-        break
-    window['-MLINE_KEY-'].update('DONE! \nFound {} active models. in the "{}" location.\n'.format(partcount, F_DRIVE.upper()), append=True)
-
+def reindex_thread(window):
+    global partsdict
+    partsdict['DB Date'] = 'NA'
+    partsdict['Models'] = []
+    window['-progress-'].update(0, 100, visible=True)
+    find_old_f_loc()
+    window['-progress-'].update(25, 100)
+    find_old_i_loc()
+    window['-progress-'].update(50, 100)
+    find_cur_i_loc()
+    window['-progress-'].update(75, 100)
+    find_cur_f_loc()
+    window['-progress-'].update(99, 100)
+    save_db(partsdict)
+    window['-progress-'].update(100, 100, visible=False)
+    window['-db_date-'].update('Last database index: {}'.format(read_db()['DB Date']))
+    window.write_event_value('-Indexing Done-', '')
 
 def reindex():
-    find_cur_f_loc()
+    threading.Thread(target=reindex_thread, args=(window,), daemon=True).start()
+
+def show_all_thread(window):
+    # global stop_index
+    for model in partsdict['Models']:
+        window['-MLINE_KEY-'].write(model[0] + model[1] + '\n')
+        if stop_index:
+            break
+    window['-MLINE_KEY-'].write(len(partsdict['Models']))
+    window['-loading-'].update(visible=False)
+    window.write_event_value('-Indexing Done-', '')
+
+def show_all():
+    threading.Thread(target=show_all_thread, args=(window,), daemon=True).start()
+
+partsdict = read_db()
+stop_index = False
 
 
-layout = [  [sg.Text('Model prefix to search for:'), sg.Input(key='-prefix-', size=(5))],
-            [sg.Button('Search Current F Drive', key='-search_cur_f-'), sg.Button('Search Current I Drive', key='-search_cur_i-'),
-             sg.Button('Search Old F Drive', key='-search_old_f-'), sg.Button('Search Old I Drive', key='-search_old_i-')],
-            [sg.Text('Search Results:', font='Any 18')],
+
+layout = [  [sg.Button('Show All', key='-show all-'), sg.Button('Stop', visible=False, key='-stop-')],
+            [sg.Text('Model prefix to search for:'), sg.Input(key='-prefix-', size=(5)), sg.Button('Filter List', key='-filter-')],
+            [sg.Text('Search Results:', font='Any 18'), sg.Text('LOADING...', font='Any 18', visible=False, key='-loading-'),
+             sg.Text('INDEXING...', font='Any 18', visible=False, key='-indexing-')],
             [sg.Multiline(size=(80,20), key='-MLINE_KEY-', write_only=True, auto_refresh=True, autoscroll=True, disabled=True)],
-            [sg.Button('Quit', key='-quit-'), sg.Push(), sg.Text('This will take a long time -->'), sg.Button('Re-Index Database', button_color='red', key='-index-')]]
+            [sg.Button('Quit', key='-quit-'), sg.pin(sg.ProgressBar(100, 'h', size=(30, 20), key='-progress-', visible=False)), sg.Push(), sg.Button('Re-Index Database', button_color='red', key='-index-')],
+            [sg.Push(), sg.Text('Last database index: {}'.format(partsdict['DB Date']), key='-db_date-')]]
 
 window = sg.Window('Minco Active Model Finder', layout)
 
 
+
+
+
+
 while True:
-    event, values = window.read(timeout=500)
+    event, values = window.read()
     print(event, values)
 
     if event in (sg.WIN_CLOSED, 'Exit', '-quit-'):
         break
-    elif event == '-search_cur_f-':
-        find_all_cur_f_loc()
-    elif event == '-search_cur_i-':
-        find_cur_i_loc(window['-prefix-'].get())
-    elif event == '-search_old_f-':
-        find_old_f_loc(window['-prefix-'].get())
-    elif event == '-search_old_i-':
-        find_old_i_loc(window['-prefix-'].get())
     elif event == '-index-':
-        reindex()
+        stop_index = False
+        index_button = sg.PopupYesNo('Are you sure? This will take a long time.')
+        if index_button == 'Yes':
+            window['-indexing-'].update(visible=True)
+            window['-stop-'].update(visible=True)
+
+            t1 = threading.Thread(target=reindex_thread, args=(window,), daemon=False)
+            t1.start()
+
+
+    elif event == '-show all-':
+        stop_index = False
+        window['-loading-'].update(visible=True)
+        window['-stop-'].update(visible=True)
+        window['-MLINE_KEY-'].update('')
+
+        t2 = threading.Thread(target=show_all_thread, args=(window,), daemon=True)
+        t2.start()
+
+    elif event == '-filter-':
+        window['-loading-'].update(visible=True)
+        window['-MLINE_KEY-'].update('')
+        for model in partsdict['Models']:
+            if model[0] == window['-prefix-'].get().upper():
+                window['-MLINE_KEY-'].write(model[0] + model[1] + '\n')
+        window['-loading-'].update(visible=False)
+
+    elif event == '-Indexing Done-':
+        window['-indexing-'].update(visible=False)
+        window['-stop-'].update(visible=False)
+
+    elif event == '-stop-':
+        stop_index = True
+
+
 
 window.close()
 
