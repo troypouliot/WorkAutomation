@@ -1,5 +1,5 @@
 import pickle
 
-parts = pickle.load(open('active_parts', 'rb'))
+parts = pickle.load(open('.\\db\\active_parts', 'rb'))
 
 print(parts)

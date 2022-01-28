@@ -54,7 +54,7 @@ def check4CADFiles(dir_path):
 def write_dict(prefix, model):
     global partsdict
     partsdict['DB Date'] = time.strftime('%Y-%m-%d', time.gmtime())
-    partsdict['Models'].append((prefix, model))
+    partsdict['Models'].append((prefix, int(model)))
     return partsdict
 
 
@@ -158,28 +158,28 @@ def find_all_old_f_loc_dict():
         break
 
 def save_db(dict):
-    with open('active_parts', 'wb') as db:
+    with open('active_parts2', 'wb') as db:
         pickle.dump(dict, db)
 
 def read_db():
     with open('active_parts', 'rb') as db:
         return pickle.load(db)
 
-partsdict = read_db()
-# partsdict = {'DB Date': '', 'Models': []}
+# partsdict = read_db()
+partsdict = {'DB Date': '', 'Models': []}
 
 # find_all_old_f_loc_dict()
 # find_all_old_i_loc_dict()
-# find_all_cur_i_loc_dict()
+find_all_cur_i_loc_dict()
 # find_all_cur_f_loc_dict()
 
-# save_db(partsdict)
+save_db(partsdict)
 
 
 
 # pprint.pprint(partsdict)
 print('{} models in DB'.format(len(partsdict['Models'])))
 
-for part in partsdict['Models']:
-    if part[0] == 'HSFAP':
-        print(part)
+# for part in partsdict['Models']:
+#     if part[0] == 'HSFAP':
+#         print(part)
