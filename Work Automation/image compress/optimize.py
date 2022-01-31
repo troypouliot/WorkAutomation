@@ -1,6 +1,6 @@
 from PIL import Image
 from time import sleep
-from os import listdir, getcwd
+from os import listdir, getcwd, mkdir
 from os.path import join, splitext, exists
 
 source_dir = getcwd()
@@ -11,6 +11,7 @@ output_dir = join(source_dir, 'Optimized')
 
 if not exists(output_dir):
     print(output_dir + ' Does not exist. Creating...')
+    mkdir(output_dir)
 
 max_size = (1000, 1000)
 
