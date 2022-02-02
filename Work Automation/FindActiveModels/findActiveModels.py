@@ -363,30 +363,6 @@ while True:
 
     elif event == '-db_stats-':
         stats = db_stats_window()
-        # prefix_list = []
-        # count = []
-        # for i in partsdict['Models']:
-        #     prefix_list.append(i[0])
-        # pre_set = set(prefix_list)
-        #
-        # for pre in pre_set:
-        #     count.append((pre, prefix_list.count(pre)))
-        #
-        # count.sort(key=lambda x:x[1], reverse=True)
-        # excluded = ['$', '~', '_', '-']
-        # for i in count:
-        #     if len(i[0]) > 0 and i[1] > 1:
-        #         if not any(x in i[0] for x in excluded):
-        #             stats['-stats-'].write(str(i) + '\n')
-    #     while True:
-    #         event, values = stats.read()
-    #         if event in (sg.WIN_CLOSED, 'Exit', '-quit-', 'close'):
-    #             stats.close()
-    #             break
-    #
-    # elif event == '-stop-' or event == '-stop2-':
-    #     stop_index = True
-
 
 
 window.close()
