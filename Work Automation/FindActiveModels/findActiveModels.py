@@ -3,7 +3,7 @@ import PySimpleGUI as sg
 import pickle
 import time
 import threading
-import pprint
+
 
 
 F_DRIVE = 'F:\\Parts\\'.lower()
@@ -283,12 +283,23 @@ def prefix_thread(window):
 
 
 def db_stats_window():
+    prefix_list = []
+    count = []
+    for i in partsdict['Models']:
+        prefix_list.append(i[0])
+    pre_set = set(prefix_list)
 
+    for pre in pre_set:
+        count.append((pre, prefix_list.count(pre)))
 
-
-    layout = [[sg.Text('Model Count:')],
-              [sg.Multiline(size=(80,20), write_only=True, auto_refresh=True, key='-stats-')], [sg.Button('Close', key='close')]]
-    return sg.Window('DB Stats', layout, finalize=True, keep_on_top=True, grab_anywhere=True)
+    count.sort(key=lambda x:x[1], reverse=True)
+    excluded = ['$', '~', '_', '-']
+    new_list = []
+    for i in count:
+        if len(i[0]) > 0 and i[1] > 1:
+            if not any(x in i[0] for x in excluded):
+                new_list.append(str(i))
+    return sg.popup_scrolled(*new_list, size=(30,30), title='Database Stats', grab_anywhere=True)
 
 
 partsdict = read_db()
@@ -352,27 +363,32 @@ while True:
 
     elif event == '-db_stats-':
         stats = db_stats_window()
-        prefix_list = []
-        count = []
-        for i in partsdict['Models']:
-            prefix_list.append(i[0])
-        pre_set = set(prefix_list)
-        for pre in pre_set:
-            count.append(pre + ': ' + str(prefix_list.count(pre)))
-
-            stats['-stats-'].write(pre + ': ' + str(prefix_list.count(pre)) + '\n')
-        while True:
-            event, values = stats.read()
-            if event in (sg.WIN_CLOSED, 'Exit', '-quit-', 'close'):
-                stats.close()
-                break
-
-
-    elif event == '-stop-' or event == '-stop2-':
-        stop_index = True
+        # prefix_list = []
+        # count = []
+        # for i in partsdict['Models']:
+        #     prefix_list.append(i[0])
+        # pre_set = set(prefix_list)
+        #
+        # for pre in pre_set:
+        #     count.append((pre, prefix_list.count(pre)))
+        #
+        # count.sort(key=lambda x:x[1], reverse=True)
+        # excluded = ['$', '~', '_', '-']
+        # for i in count:
+        #     if len(i[0]) > 0 and i[1] > 1:
+        #         if not any(x in i[0] for x in excluded):
+        #             stats['-stats-'].write(str(i) + '\n')
+    #     while True:
+    #         event, values = stats.read()
+    #         if event in (sg.WIN_CLOSED, 'Exit', '-quit-', 'close'):
+    #             stats.close()
+    #             break
+    #
+    # elif event == '-stop-' or event == '-stop2-':
+    #     stop_index = True
 
 
 
 window.close()
-stats.close()
+
 
