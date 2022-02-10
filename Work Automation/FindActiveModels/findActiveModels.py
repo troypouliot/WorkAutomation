@@ -399,5 +399,4 @@ while True:
     elif event == '-db_stats-':
         stats = db_stats_window()
 
-
 window.close()
