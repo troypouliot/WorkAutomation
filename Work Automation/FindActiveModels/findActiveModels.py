@@ -10,6 +10,7 @@ F_DRIVE = 'F:\\Parts\\'.lower()
 I_DRIVE = 'I:\\US\\Parts\\'.lower()
 OLD_F_LOC = 'F:\\HEATERS\\Eng\\Parts\\'.lower()
 OLD_I_LOC = 'I:\\US\\Heaters\\Eng\\Parts\\'.lower()
+OLD_RUB_LOC = 'F:\\HEATERS\\Misc\\Plant2\\STANDARDS'.lower()
 TREE_1 = ['3-Design'.lower(), '3_Design'.lower(), 'CAD'.lower()]
 TREE_2 = ['304-CADCAM'.lower(), '304_CADCAM'.lower()]
 
@@ -27,7 +28,7 @@ def isActive(dir_path, prefix, model_num):
     pre = []
     if countFiles(dir_path) > 4:
         for file in all_files:
-            if model_num.strip(prefix) in file:
+            if model_num in file:
                 key_files.append(file.split(model_num)[0])
         for _ in key_files:
             if len(_) > 1:
@@ -92,16 +93,17 @@ def find_cur_f_loc():
                     for sub1 in subfolders1:
                         if stop_index:
                             raise StopIteration
-                        modelpath = path.join(F_DRIVE, sub, sub1)
-                        for tree1 in TREE_1:
-                            if path.exists(path.normcase(path.join(modelpath, tree1))):
-                                for tree2 in TREE_2:
-                                    if path.exists(path.join(modelpath, tree1, tree2)):
-                                        if path.exists(path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
-                                            write_to_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
-                                            window['-MLINE_KEY-'].write(sub1.strip('1234567890') + sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + '\n')
-                                            if stop_index:
-                                                raise StopIteration
+                        if not sub1.endswith('T'):
+                            modelpath = path.join(F_DRIVE, sub, sub1)
+                            for tree1 in TREE_1:
+                                if path.exists(path.normcase(path.join(modelpath, tree1))):
+                                    for tree2 in TREE_2:
+                                        if path.exists(path.join(modelpath, tree1, tree2)):
+                                            if path.exists(path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
+                                                write_to_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+                                                window['-MLINE_KEY-'].write(sub1.strip('1234567890') + sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + '\n')
+                                                if stop_index:
+                                                    raise StopIteration
                     break
             break
     except StopIteration:
@@ -128,7 +130,7 @@ def find_old_f_loc():
                         for tree1 in TREE_1:
                             if path.exists(path.normcase(path.join(modelpath, tree1))):
                                 if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
-                                    pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                    pre, model = isActive(path.join(modelpath, tree1), '', sub1)
                                     if pre != 'N' and len(pre) <= 5:
                                         write_to_dict(pre, model)
                                         window['-MLINE_KEY-'].write(pre + model + '\n')
@@ -139,7 +141,7 @@ def find_old_f_loc():
                                 for tree2 in TREE_2:
                                     if path.exists(path.join(modelpath, tree1, tree2)):
                                         if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
-                                            pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                            pre, model = isActive(path.join(modelpath, tree1, tree2), '', sub1)
                                             if pre != 'N' and len(pre) <= 5:
                                                 write_to_dict(pre, model)
                                                 window['-MLINE_KEY-'].write(pre + model + '\n')
@@ -160,17 +162,18 @@ def find_cur_i_loc():
                     for sub1 in subfolders1:
                         if stop_index:
                             raise StopIteration
-                        modelpath = path.join(I_DRIVE, sub, sub1)
-                        for tree1 in TREE_1:
-                            if path.exists(path.normcase(path.join(modelpath, tree1))):
-                                for tree2 in TREE_2:
-                                    if path.exists(path.join(modelpath, tree1, tree2)):
-                                        if path.exists(
-                                                path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
-                                            write_to_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
-                                            window['-MLINE_KEY-'].write(sub1.strip('1234567890') + sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + '\n')
-                                            if stop_index:
-                                                raise StopIteration
+                        if not sub1.endswith('T'):
+                            modelpath = path.join(I_DRIVE, sub, sub1)
+                            for tree1 in TREE_1:
+                                if path.exists(path.normcase(path.join(modelpath, tree1))):
+                                    for tree2 in TREE_2:
+                                        if path.exists(path.join(modelpath, tree1, tree2)):
+                                            if path.exists(
+                                                    path.join(modelpath, tree1, tree2, sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))):
+                                                write_to_dict(sub1.strip('1234567890'), sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+                                                window['-MLINE_KEY-'].write(sub1.strip('1234567890') + sub1.strip('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + '\n')
+                                                if stop_index:
+                                                    raise StopIteration
 
                     break
             break
@@ -198,7 +201,7 @@ def find_old_i_loc():
                         for tree1 in TREE_1:
                             if path.exists(path.normcase(path.join(modelpath, tree1))):
                                 if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
-                                    pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                    pre, model = isActive(path.join(modelpath, tree1), '', sub1)
                                     if pre != 'N' and len(pre) <= 5:
                                         write_to_dict(pre, model)
                                         window['-MLINE_KEY-'].write(pre + model + '\n')
@@ -209,7 +212,7 @@ def find_old_i_loc():
                                 for tree2 in TREE_2:
                                     if path.exists(path.join(modelpath, tree1, tree2)):
                                         if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
-                                            pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                                            pre, model = isActive(path.join(modelpath, tree1, tree2), '', sub1)
                                             if pre != 'N' and len(pre) <= 5:
                                                 write_to_dict(pre, model)
                                                 window['-MLINE_KEY-'].write(pre + model + '\n')
@@ -222,18 +225,59 @@ def find_old_i_loc():
         pass
 
 
+def find_old_rub_loc():
+    try:
+        for folderName, subfolders, filenames in walk(OLD_RUB_LOC):
+            for sub in subfolders:
+                if stop_index:
+                    raise StopIteration
+                modelpath = path.normcase(path.join(folderName, sub))
+                if check4CADFiles(modelpath) is True:
+                    pre, model = isActive(path.join(folderName, sub), '', sub)
+                    if pre != 'N' and len(pre) <= 5:
+                        write_to_dict(pre, model)
+                        window['-MLINE_KEY-'].write(pre + model + '\n')
+                    if stop_index:
+                        raise StopIteration
+                    continue
+                for tree1 in TREE_1:
+                    if path.exists(path.normcase(path.join(modelpath, tree1))):
+                        if check4CADFiles(path.normcase(path.join(modelpath, tree1))):
+                            pre, model = isActive(path.join(folderName, sub, tree1), '', sub)
+                            if pre != 'N' and len(pre) <= 5:
+                                write_to_dict(pre, model)
+                                window['-MLINE_KEY-'].write(pre + model + '\n')
+                            if stop_index:
+                                raise StopIteration
+                            continue
+                        # TREE_2.append(sub1)
+                        # for tree2 in TREE_2:
+                        #     if path.exists(path.join(modelpath, tree1, tree2)):
+                        #         if check4CADFiles(path.normcase(path.join(modelpath, tree1, tree2))):
+                        #             pre, model = isActive(path.join(folderName, sub, sub1), '', sub1)
+                        #             if pre != 'N' and len(pre) <= 5:
+                        #                 # write_dict(pre, model)
+                        #                 print(pre, model)
+                        # TREE_2.pop()  # remove the sub1 item that was added to the tree_2 list since it is specific to the model
+
+            break
+    except StopIteration:
+        pass
+
 def reindex_thread(window):
     global partsdict
     partsdict['DB Date'] = 'NA'
     partsdict['Models'] = []
     window['-progress-'].update(0, 100, visible=True)
     find_cur_f_loc()
-    window['-progress-'].update(25, 100)
+    window['-progress-'].update(20, 100)
     find_cur_i_loc()
-    window['-progress-'].update(50, 100)
+    window['-progress-'].update(40, 100)
     find_old_i_loc()
-    window['-progress-'].update(75, 100)
+    window['-progress-'].update(60, 100)
     find_old_f_loc()
+    window['-progress-'].update(80, 100)
+    find_old_rub_loc()
     window['-progress-'].update(99, 100)
     save_db(partsdict)
     window['-progress-'].update(100, 100, visible=False)
