@@ -392,11 +392,11 @@ while True:
         window['-indexing-'].update(visible=False)
         window['-stop-'].update(visible=False)
 
+    elif event == '-db_stats-':
+        stats = db_stats_window()
+
     elif event == '-stop-' or '-stop2-':
         stop_index = True
         window['-stop-'].update(visible=False)
-
-    elif event == '-db_stats-':
-        stats = db_stats_window()
 
 window.close()
