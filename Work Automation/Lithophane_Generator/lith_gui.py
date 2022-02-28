@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import Select
 from configparser import ConfigParser
 from PIL import Image
 
-version = '1.3.0'
+version = '1.3.1'
 
 class Lithophane:
     def __init__(self, type):
@@ -66,12 +66,17 @@ class Lithophane:
         self.driver = webdriver.Chrome(options=options)
         return self.driver
 
+
     def start_browser(self, path, _type):
-        self.newchromebrowser(headless=False, downloadpath=path)
-        if _type == 'wind' or _type == 'box':
-            self.driver.get(self.window_url)
-        else:
-            self.driver.get(self.nl_url)
+        try:
+            self.newchromebrowser(headless=False, downloadpath=path)
+            if _type == 'wind' or _type == 'box':
+                self.driver.get(self.window_url)
+            else:
+                self.driver.get(self.nl_url)
+        except selenium.common.exceptions.SessionNotCreatedException as err:
+            sg.popup('Something went wrong:' + '\n' * 2 + str(err), title='Error')
+
 
     def clear_fields(self):
         inputs = self.driver.find_elements_by_tag_name('input')
