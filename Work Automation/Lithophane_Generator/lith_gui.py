@@ -4,10 +4,11 @@ import io
 import selenium.common.exceptions
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.by import By
 from configparser import ConfigParser
 from PIL import Image
 
-version = '1.3.1'
+version = '1.3.2'
 
 class Lithophane:
     def __init__(self, type):
@@ -79,7 +80,8 @@ class Lithophane:
 
 
     def clear_fields(self):
-        inputs = self.driver.find_elements_by_tag_name('input')
+        # inputs = self.driver.find_elements_by_tag_name('input')
+        inputs = self.driver.find_elements(by=By.TAG_NAME, value="input")
         for item in inputs:
             try:
                 item.clear()
@@ -90,87 +92,89 @@ class Lithophane:
         _type = 'wind'
         self.start_browser(path, _type)
         self.clear_fields()
-        select = Select(self.driver.find_element_by_id('hole_num'))
+        select = Select(self.driver.find_element(by=By.ID, value='hole_num'))
         select.select_by_visible_text('No Border')
-        self.driver.find_element_by_name('fileToUpload').send_keys(file)
-        self.driver.find_element_by_id('lith_res').send_keys(my_lith.res)
-        self.driver.find_element_by_id('max_thickness').send_keys(my_lith.max_thick)
-        self.driver.find_element_by_id('min_thickness').send_keys(my_lith.min_thick)
-        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user)
-        self.driver.find_element_by_id('x_shift').send_keys('0.5')
-        self.driver.find_element_by_id('y_shift').send_keys('0.5')
-        self.driver.find_element_by_id('rect_scale').send_keys('1.0')
+        self.driver.find_element(by=By.NAME, value='fileToUpload').send_keys(file)
+        self.driver.find_element(by=By.ID, value='lith_res').send_keys(my_lith.res)
+        self.driver.find_element(by=By.ID, value='max_thickness').send_keys(my_lith.max_thick)
+        self.driver.find_element(by=By.ID, value='min_thickness').send_keys(my_lith.min_thick)
+        self.driver.find_element(by=By.ID, value='emailAddress').send_keys(my_lith.user)
+        self.driver.find_element(by=By.ID, value='x_shift').send_keys('0.5')
+        self.driver.find_element(by=By.ID, value='y_shift').send_keys('0.5')
+        self.driver.find_element(by=By.ID, value='rect_scale').send_keys('1.0')
         if sub_type == 'sm':
-            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_sm_wid)
-            self.driver.find_element_by_id('height').send_keys(my_lith.w_sm_hei)
+            self.driver.find_element(by=By.ID, value='base_length').send_keys(my_lith.w_sm_wid)
+            self.driver.find_element(by=By.ID, value='height').send_keys(my_lith.w_sm_hei)
         elif sub_type == 'med':
-            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_med_wid)
-            self.driver.find_element_by_id('height').send_keys(my_lith.w_med_hei)
+            self.driver.find_element(by=By.ID, value='base_length').send_keys(my_lith.w_med_wid)
+            self.driver.find_element(by=By.ID, value='height').send_keys(my_lith.w_med_hei)
         else:
-            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_lrg_wid)
-            self.driver.find_element_by_id('height').send_keys(my_lith.w_lrg_hei)
-        download_btn = self.driver.find_element_by_name('submit')
+            self.driver.find_element(by=By.ID, value='base_length').send_keys(my_lith.w_lrg_wid)
+            self.driver.find_element(by=By.ID, value='height').send_keys(my_lith.w_lrg_hei)
+        download_btn = self.driver.find_element(by=By.NAME, value='submit')
         download_btn.click()
 
     def dl_box(self, file, path, sub_type):
         _type = 'box'
         self.start_browser(path, _type)
         self.clear_fields()
-        select = Select(self.driver.find_element_by_id('hole_num'))
+        select = Select(self.driver.find_element(by=By.ID, value='hole_num'))
         select.select_by_visible_text('Frame Only')
-        self.driver.find_element_by_name('fileToUpload').send_keys(file)
-        self.driver.find_element_by_id('lith_res').send_keys(my_lith.res)
-        self.driver.find_element_by_id('max_thickness').send_keys(my_lith.max_thick)
-        self.driver.find_element_by_id('min_thickness').send_keys(my_lith.min_thick)
-        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user)
-        self.driver.find_element_by_id('x_shift').send_keys('0.5')
-        self.driver.find_element_by_id('y_shift').send_keys('0.5')
-        self.driver.find_element_by_id('rect_scale').send_keys('1.0')
-        self.driver.find_element_by_id('base_width').send_keys(my_lith.b_frame_width)
-        self.driver.find_element_by_id('base_height').send_keys(my_lith.b_frame_height)
-        self.driver.find_element_by_id('ledge_angle').send_keys(my_lith.b_frame_angle)
+        self.driver.find_element(by=By.NAME, value='fileToUpload').send_keys(file)
+        self.driver.find_element(by=By.ID, value='lith_res').send_keys(my_lith.res)
+        self.driver.find_element(by=By.ID, value='max_thickness').send_keys(my_lith.max_thick)
+        self.driver.find_element(by=By.ID, value='min_thickness').send_keys(my_lith.min_thick)
+        self.driver.find_element(by=By.ID, value='emailAddress').send_keys(my_lith.user)
+        self.driver.find_element(by=By.ID, value='x_shift').send_keys('0.5')
+        self.driver.find_element(by=By.ID, value='y_shift').send_keys('0.5')
+        self.driver.find_element(by=By.ID, value='rect_scale').send_keys('1.0')
+        self.driver.find_element(by=By.ID, value='base_width').send_keys(my_lith.b_frame_width)
+        self.driver.find_element(by=By.ID, value='base_height').send_keys(my_lith.b_frame_height)
+        self.driver.find_element(by=By.ID, value='ledge_angle').send_keys(my_lith.b_frame_angle)
         if sub_type == 'sm':
-            self.driver.find_element_by_id('base_length').send_keys(my_lith.b_sm_size)
-            self.driver.find_element_by_id('height').send_keys(my_lith.b_sm_size)
+            self.driver.find_element(by=By.ID, value='base_length').send_keys(my_lith.b_sm_size)
+            self.driver.find_element(by=By.ID, value='height').send_keys(my_lith.b_sm_size)
         elif sub_type == 'med':
-            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_med_wid)
-            self.driver.find_element_by_id('height').send_keys(my_lith.w_med_hei)
+            self.driver.find_element(by=By.ID, value='base_length').send_keys(my_lith.w_med_wid)
+            self.driver.find_element(by=By.ID, value='height').send_keys(my_lith.w_med_hei)
         else:
-            self.driver.find_element_by_id('base_length').send_keys(my_lith.w_lrg_wid)
-            self.driver.find_element_by_id('height').send_keys(my_lith.w_lrg_hei)
-        download_btn = self.driver.find_element_by_name('submit')
+            self.driver.find_element(by=By.ID, value='base_length').send_keys(my_lith.w_lrg_wid)
+            self.driver.find_element(by=By.ID, value='height').send_keys(my_lith.w_lrg_hei)
+        download_btn = self.driver.find_element(by=By.NAME, value='submit')
         download_btn.click()
 
     def dl_nl(self, file, path, sub_type):
         _type = 'nl'
         self.start_browser(path, _type)
         self.clear_fields()
-        self.driver.find_element_by_name('fileToUpload').send_keys(file)
-        self.driver.find_element_by_id('lith_res').send_keys(my_lith.res)
-        self.driver.find_element_by_id('t_max').send_keys(my_lith.max_thick)
-        self.driver.find_element_by_id('t_min').send_keys(my_lith.min_thick)
-        self.driver.find_element_by_id('frame_width').send_keys(my_lith.frame_width)
-        self.driver.find_element_by_id('w_slot').send_keys(my_lith.slot_width)
-        self.driver.find_element_by_id('d_slot').send_keys(my_lith.slot_depth)
-        self.driver.find_element_by_id('t_base').send_keys(my_lith.adapt_thick)
-        self.driver.find_element_by_id('LLS').send_keys(my_lith.light_to_lith_dis)
-        self.driver.find_element_by_id('emailAddress').send_keys(my_lith.user)
-        self.driver.find_element_by_id('x_shift').send_keys('0.5')
-        self.driver.find_element_by_id('y_shift').send_keys('0.5')
-        self.driver.find_element_by_id('rect_scale').send_keys('1.0')
+        # self.driver.find_element(by=By.NAME, value='fileToUpload').send_keys(file)
+        self.driver.find_element(by=By.NAME, value='fileToUpload').send_keys(file)
+        # self.driver.find_element(by=By.ID, value='lith_res').send_keys(my_lith.res)
+        self.driver.find_element(by=By.ID, value='lith_res').send_keys(my_lith.res)
+        self.driver.find_element(by=By.ID, value='t_max').send_keys(my_lith.max_thick)
+        self.driver.find_element(by=By.ID, value='t_min').send_keys(my_lith.min_thick)
+        self.driver.find_element(by=By.ID, value='frame_width').send_keys(my_lith.frame_width)
+        self.driver.find_element(by=By.ID, value='w_slot').send_keys(my_lith.slot_width)
+        self.driver.find_element(by=By.ID, value='d_slot').send_keys(my_lith.slot_depth)
+        self.driver.find_element(by=By.ID, value='t_base').send_keys(my_lith.adapt_thick)
+        self.driver.find_element(by=By.ID, value='LLS').send_keys(my_lith.light_to_lith_dis)
+        self.driver.find_element(by=By.ID, value='emailAddress').send_keys(my_lith.user)
+        self.driver.find_element(by=By.ID, value='x_shift').send_keys('0.5')
+        self.driver.find_element(by=By.ID, value='y_shift').send_keys('0.5')
+        self.driver.find_element(by=By.ID, value='rect_scale').send_keys('1.0')
         if sub_type == 'square':
-            self.driver.find_element_by_id('radius').send_keys(my_lith.nl_sq_rad)
-            self.driver.find_element_by_id('x_span').send_keys(my_lith.nl_sq_wid)
-            self.driver.find_element_by_id('z_dim').send_keys(my_lith.nl_sq_hei)
+            self.driver.find_element(by=By.ID, value='radius').send_keys(my_lith.nl_sq_rad)
+            self.driver.find_element(by=By.ID, value='x_span').send_keys(my_lith.nl_sq_wid)
+            self.driver.find_element(by=By.ID, value='z_dim').send_keys(my_lith.nl_sq_hei)
         elif sub_type == 'portrait':
-            self.driver.find_element_by_id('radius').send_keys(my_lith.nl_por_rad)
-            self.driver.find_element_by_id('x_span').send_keys(my_lith.nl_por_wid)
-            self.driver.find_element_by_id('z_dim').send_keys(my_lith.nl_por_hei)
+            self.driver.find_element(by=By.ID, value='radius').send_keys(my_lith.nl_por_rad)
+            self.driver.find_element(by=By.ID, value='x_span').send_keys(my_lith.nl_por_wid)
+            self.driver.find_element(by=By.ID, value='z_dim').send_keys(my_lith.nl_por_hei)
         else:
-            self.driver.find_element_by_id('radius').send_keys(my_lith.nl_lan_rad)
-            self.driver.find_element_by_id('x_span').send_keys(my_lith.nl_lan_wid)
-            self.driver.find_element_by_id('z_dim').send_keys(my_lith.nl_lan_hei)
-        download_btn = self.driver.find_element_by_name('submit')
+            self.driver.find_element(by=By.ID, value='radius').send_keys(my_lith.nl_lan_rad)
+            self.driver.find_element(by=By.ID, value='x_span').send_keys(my_lith.nl_lan_wid)
+            self.driver.find_element(by=By.ID, value='z_dim').send_keys(my_lith.nl_lan_hei)
+        download_btn = self.driver.find_element(by=By.NAME, value='submit')
         download_btn.click()
 
 
