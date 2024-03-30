@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from configparser import ConfigParser
 from PIL import Image
 
-version = '1.3.2'
+version = '1.4.0'
 
 class Lithophane:
     def __init__(self, type):
@@ -180,7 +180,7 @@ class Lithophane:
 
 sg.theme('DarkGrey5')
 file_types = (('Images', '*.jpg *.jpeg *.png *.bmp'), )
-
+fp = ''
 
 def main_window():
     lith_type_frame_layout = [
@@ -197,11 +197,11 @@ def main_window():
                              ]
 
     image_preview_frame_layout = [[sg.Image(key="-IMAGE-")]]
-
-    file_input_frame_layout = [[sg.Text('File: '), sg.Text('', key='-filename-')],
-                               [sg.FileBrowse(file_types=file_types, key='-load_img_btn-')]]
     dl_path_frame_layout = [[sg.Text('Download Path: '), sg.Text('', key='-dl_path-')],
-                            [sg.FolderBrowse(initial_folder='c:/users', key='-dl_path_btn-')]]
+                            [sg.FolderBrowse(initial_folder=get_config_param('def_path'), key='-dl_path_btn-')]]
+    file_input_frame_layout = [[sg.Text('File: '), sg.Text('', key='-filename-')],
+                               [sg.FileBrowse(file_types=file_types, key='-load_img_btn-', initial_folder=fp)]]
+
     layout = [[sg.Frame('Lithophane Type', lith_type_frame_layout, size=(300, 50))],
               [sg.pin(sg.Frame('Size', sub_type_frame_layout, key='sz', size=(300, 50)))],
               [sg.Frame('', dl_path_frame_layout, size=(300, 60))],
@@ -457,7 +457,10 @@ def settings_window_tabbed():
                             default_text=get_config_param('nl_url'))],
                   [sg.Text('Window URL:')],
                   [sg.Input(k='window_url', size=(20,1),
-                            default_text=get_config_param('window_url'))]
+                            default_text=get_config_param('window_url'))],
+                  [sg.Text('Default Path:')],
+                  [sg.Input(k='def_path', size=(20, 1),
+                            default_text=get_config_param('def_path'))]
                   ], vertical_alignment='top'),
        sg.Column([[sg.Text('Minimum Thickness:')],
                   [sg.Input(k='min_thick', size=(3, 1),
