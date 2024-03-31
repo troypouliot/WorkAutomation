@@ -1,3 +1,6 @@
+import shutil
+import time
+
 import PySimpleGUI as sg
 import os
 import io
@@ -8,7 +11,8 @@ from selenium.webdriver.common.by import By
 from configparser import ConfigParser
 from PIL import Image
 
-version = '1.4.0'
+
+version = '1.5.0'
 
 class Lithophane:
     def __init__(self, type):
@@ -65,6 +69,7 @@ class Lithophane:
             # os.makedirs(downloadpath, exist_ok=True)
             options.add_experimental_option("prefs", prefs)
         self.driver = webdriver.Chrome(options=options)
+
         return self.driver
 
 
@@ -317,6 +322,8 @@ def get_config_param(option, section='DEFAULT'):
     config.read(['./config/config.ini', './config.ini'])
     return config.get(section, option).replace('%', '%%')
 
+def unzip_file(zip_path, unzip_loc):
+    shutil.unpack_archive(zip_path, unzip_loc, 'zip')
 
 def settings_window():
     default_frame = sg.Frame('Default Settings', [[sg.Column([[sg.Text('Resolution:')],
@@ -659,6 +666,7 @@ while True:
         filename_elem = window_main['-filename-']
         fp = os.path.normpath(values['-load_img_btn-'])
         fn = os.path.basename(fp)
+        base_fn = str.split(fn,'.')[0]
         filename_elem.update(fn)
         if os.path.exists(fp):
             image = Image.open(values["-load_img_btn-"])
@@ -697,15 +705,56 @@ while True:
     if event == 'Create File':
         try:
             my_lith = Lithophane(base_type)
+
             if base_type == 'nl':
                 my_lith.dl_nl(fp, dl_path, sub_type)
+                time.sleep(5)
+                lst_files = [f for f in os.listdir(dl_path) if f.endswith('.zip')]
+                print("File lisr: " + str(lst_files))
+                comp = []
+                for f in lst_files:
+                    comp.append(os.path.join(dl_path, f))
+                print("complete lisr: " + str(comp))
+                latest_file = max(comp, key=os.path.getctime)
+                print('Latest file: ' + latest_file)
+                print('Download path: ' + dl_path)
+                unzip_file(os.path.normpath(latest_file), dl_path)
+
             elif base_type == 'box':
                 my_lith.dl_box(fp, dl_path, sub_type)
+                time.sleep(5)
+                lst_files = [f for f in os.listdir(dl_path) if f.endswith('.zip')]
+                print("File lisr: " + str(lst_files))
+                comp = []
+                for f in lst_files:
+                    comp.append(os.path.join(dl_path, f))
+                print("complete lisr: " + str(comp))
+                latest_file = max(comp, key=os.path.getctime)
+                print('Latest file: ' + latest_file)
+                print('Download path: ' + dl_path)
+                unzip_file(os.path.normpath(latest_file), dl_path)
             else:
                 my_lith.dl_wind(fp, dl_path, sub_type)
+                time.sleep(5)
+                lst_files = [f for f in os.listdir(dl_path) if f.endswith('.zip')]
+                print("File lisr: " + str(lst_files))
+                comp = []
+                for f in lst_files:
+                    comp.append(os.path.join(dl_path, f))
+                print("complete lisr: " + str(comp))
+                latest_file = max(comp, key=os.path.getctime)
+                print('Latest file: ' + latest_file)
+                print('Download path: ' + dl_path)
+                unzip_file(os.path.normpath(latest_file), dl_path)
+
+
+
+
         except NameError as err:
             print(err)
             sg.PopupOK('Make sure all fields are set', )
+
+
 
 
     # if event != sg.TIMEOUT_KEY:
